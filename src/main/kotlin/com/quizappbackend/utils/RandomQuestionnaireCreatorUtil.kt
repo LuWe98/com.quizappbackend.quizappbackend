@@ -34,87 +34,90 @@ object RandomQuestionnaireCreatorUtil {
         val faculties = async { mongoRepository.getAllEntries<MongoFaculty>() }
         val coursesOfStudies = async { mongoRepository.getAllEntries<MongoCourseOfStudies>() }
 
-        return@withContext generateQuestionnaires(questionnaireAmount, principle, faculties.await(), coursesOfStudies.await()).onEach { questionnaire ->
-            questionnaire.questions = generateQuestions(minQuestionsPerQuestionnaire, maxQuestionsPerQuestionnaire).onEach { question ->
-                question.answers = generateAnswers(minAnswersPerQuestion, maxAnswersPerQuestion, question)
-            }
+        return@withContext List(questionnaireAmount) { index ->
+            val randomFaculty = faculties.await().random()
+            val randomCourseOfStudies = coursesOfStudies.await().filter { cos -> randomFaculty.id in cos.facultyIds }.random()
+
+            MongoQuestionnaire(
+                title = "Questionnaire Title No. $index",
+                authorInfo = AuthorInfo(principle.userId, principle.userName),
+                facultyIds = listOf(randomFaculty.id),
+                courseOfStudiesIds = listOf(randomCourseOfStudies.id),
+                subject = "IW",
+                questions = generateQuestions(
+                    minQuestionsPerQuestionnaire,
+                    maxQuestionsPerQuestionnaire,
+                    minAnswersPerQuestion,
+                    maxAnswersPerQuestion
+                )
+            )
         }
     }
 
-    private fun generateQuestionnaires(
-        questionnaireAmount: Int,
-        principle: JWTPrincipal,
-        faculties: List<MongoFaculty>,
-        coursesOfStudies: List<MongoCourseOfStudies>
-    ) = Array(questionnaireAmount) { index ->
-        val randomFaculty = faculties.random()
-        val randomCourseOfStudies = coursesOfStudies.filter { cos -> randomFaculty.id in cos.facultyIds }.random()
-
-        MongoQuestionnaire(
-            title = "Questionnaire Title No. $index",
-            authorInfo = AuthorInfo(principle.userId, principle.userName),
-            facultyIds = listOf(randomFaculty.id),
-            courseOfStudiesIds = listOf(randomCourseOfStudies.id),
-            subject = "IW"
-        )
-    }.toList()
-
-
     private fun generateQuestions(
         min: Int,
-        max: Int
-    ) = Array(Random.nextInt(max - min + 1) + min) { index ->
+        max: Int,
+        minAnswersPerQuestion: Int,
+        maxAnswersPerQuestion: Int
+    ) = List(Random.nextInt(max - min + 1) + min) { index ->
+        val isMultipleChoice = Random.nextBoolean()
         MongoQuestion(
             questionText = "Question Text No. $index",
             questionPosition = index,
-            isMultipleChoice = Random.nextBoolean()
+            isMultipleChoice = isMultipleChoice,
+            answers = generateAnswers(minAnswersPerQuestion, maxAnswersPerQuestion, isMultipleChoice)
         )
-    }.toList()
-
+    }
 
     private fun generateAnswers(
         min: Int,
         max: Int,
-        question: MongoQuestion
+        isMultipleChoice: Boolean
     ): List<MongoAnswer> {
-        val answers = Array(Random.nextInt(max - min + 1) + min) { index ->
-            MongoAnswer(answerText = "Answer Text No. $index", answerPosition = index)
-        }.toList()
+        var atLeastOneAnswerCorrect = false
+        val answerAmount = Random.nextInt(max - min + 1) + min
 
-        if(question.isMultipleChoice){
-            answers.onEach { it.isAnswerCorrect = Random.nextBoolean() }
-            if (answers.none(MongoAnswer::isAnswerCorrect)) {
-                answers.random().isAnswerCorrect = true
+        return List(answerAmount) { index ->
+            val isAnswerCorrect =
+                if (index == answerAmount && !atLeastOneAnswerCorrect) {
+                    true
+                } else {
+                    when {
+                        isMultipleChoice -> Random.nextBoolean()
+                        !isMultipleChoice && atLeastOneAnswerCorrect -> false
+                        else -> Random.nextBoolean()
+                    }
+                }
+
+            if(!atLeastOneAnswerCorrect) {
+                atLeastOneAnswerCorrect = isAnswerCorrect
             }
-        } else {
-            answers.random().isAnswerCorrect = true
+
+            MongoAnswer(
+                answerText = "Answer Text No. $index",
+                answerPosition = index,
+                isAnswerCorrect = isAnswerCorrect
+            )
         }
-
-        return answers
     }
-
-
-
-
-
 
 
 
 
 
     //TODO -> Hier gescheite Fragebögen erstellen fürs testen
-    fun generateReadableQuestionnaires(principle: JWTPrincipal) : List<MongoQuestionnaire> {
+    fun generateReadableQuestionnaires(principle: JWTPrincipal): List<MongoQuestionnaire> {
         val questionnaireOne = generateReadableQuestionnaireOne(principle)
 
         return listOf(questionnaireOne)
     }
 
-    private fun generateReadableQuestionnaireOne(principle: JWTPrincipal) : MongoQuestionnaire {
+    private fun generateReadableQuestionnaireOne(principle: JWTPrincipal): MongoQuestionnaire {
         val answersQuestionOne = listOf(
-            MongoAnswer(answerText = "4", isAnswerCorrect = false),
-            MongoAnswer(answerText = "5", isAnswerCorrect = false),
-            MongoAnswer(answerText = "7", isAnswerCorrect = false),
-            MongoAnswer(answerText = "9", isAnswerCorrect = true)
+            MongoAnswer(answerText = "4", answerPosition = 0, isAnswerCorrect = false),
+            MongoAnswer(answerText = "5", answerPosition = 1, isAnswerCorrect = false),
+            MongoAnswer(answerText = "7", answerPosition = 2, isAnswerCorrect = false),
+            MongoAnswer(answerText = "9", answerPosition = 3, isAnswerCorrect = true)
         )
 
         val questionOne = MongoQuestion(
@@ -126,10 +129,10 @@ object RandomQuestionnaireCreatorUtil {
 
 
         val answersQuestionTwo = listOf(
-            MongoAnswer(answerText = "45", isAnswerCorrect = false),
-            MongoAnswer(answerText = "55", isAnswerCorrect = false),
-            MongoAnswer(answerText = "65", isAnswerCorrect = true),
-            MongoAnswer(answerText = "75", isAnswerCorrect = true)
+            MongoAnswer(answerText = "45", answerPosition = 0, isAnswerCorrect = false),
+            MongoAnswer(answerText = "55", answerPosition = 1, isAnswerCorrect = false),
+            MongoAnswer(answerText = "65", answerPosition = 2, isAnswerCorrect = true),
+            MongoAnswer(answerText = "75", answerPosition = 3, isAnswerCorrect = true)
         )
 
         val questionTwo = MongoQuestion(
@@ -141,9 +144,9 @@ object RandomQuestionnaireCreatorUtil {
 
 
         val answersQuestionThree = listOf(
-            MongoAnswer(answerText = "Oder", isAnswerCorrect = false),
-            MongoAnswer(answerText = "Donau", isAnswerCorrect = true),
-            MongoAnswer(answerText = "Rhein", isAnswerCorrect = false)
+            MongoAnswer(answerText = "Oder", answerPosition = 0, isAnswerCorrect = false),
+            MongoAnswer(answerText = "Donau", answerPosition = 1, isAnswerCorrect = true),
+            MongoAnswer(answerText = "Rhein", answerPosition = 2, isAnswerCorrect = false)
         )
 
         val questionThree = MongoQuestion(
@@ -154,11 +157,11 @@ object RandomQuestionnaireCreatorUtil {
         )
 
 
-        val answersQuestionFour= listOf(
-            MongoAnswer(answerText = "Rohstoffe", isAnswerCorrect = true),
-            MongoAnswer(answerText = "Stromkosten der Produktion", isAnswerCorrect = false),
-            MongoAnswer(answerText = "Lieferkosten", isAnswerCorrect = true),
-            MongoAnswer(answerText = "Miete", isAnswerCorrect = false)
+        val answersQuestionFour = listOf(
+            MongoAnswer(answerText = "Rohstoffe", answerPosition = 0, isAnswerCorrect = true),
+            MongoAnswer(answerText = "Stromkosten der Produktion", answerPosition = 1, isAnswerCorrect = false),
+            MongoAnswer(answerText = "Lieferkosten", answerPosition = 2, isAnswerCorrect = true),
+            MongoAnswer(answerText = "Miete", answerPosition = 3, isAnswerCorrect = false)
         )
 
         val questionFour = MongoQuestion(
@@ -169,11 +172,11 @@ object RandomQuestionnaireCreatorUtil {
         )
 
 
-        val answersQuestionFive= listOf(
-            MongoAnswer(answerText = "B-Rabbit", isAnswerCorrect = true),
-            MongoAnswer(answerText = "Bizarre", isAnswerCorrect = false),
-            MongoAnswer(answerText = "Shady", isAnswerCorrect = true),
-            MongoAnswer(answerText = "Proof", isAnswerCorrect = false)
+        val answersQuestionFive = listOf(
+            MongoAnswer(answerText = "B-Rabbit", answerPosition = 0, isAnswerCorrect = true),
+            MongoAnswer(answerText = "Bizarre", answerPosition = 1, isAnswerCorrect = false),
+            MongoAnswer(answerText = "Shady", answerPosition = 2, isAnswerCorrect = true),
+            MongoAnswer(answerText = "Proof", answerPosition = 3, isAnswerCorrect = false)
         )
 
         val questionFive = MongoQuestion(
@@ -185,11 +188,11 @@ object RandomQuestionnaireCreatorUtil {
 
 
         val answersQuestionSix = listOf(
-            MongoAnswer(answerText = "1954", isAnswerCorrect = true),
-            MongoAnswer(answerText = "1974", isAnswerCorrect = true),
-            MongoAnswer(answerText = "1978", isAnswerCorrect = false),
-            MongoAnswer(answerText = "1986", isAnswerCorrect = false),
-            MongoAnswer(answerText = "1990", isAnswerCorrect = true)
+            MongoAnswer(answerText = "1954", answerPosition = 0, isAnswerCorrect = true),
+            MongoAnswer(answerText = "1974", answerPosition = 1, isAnswerCorrect = true),
+            MongoAnswer(answerText = "1978", answerPosition = 2, isAnswerCorrect = false),
+            MongoAnswer(answerText = "1986", answerPosition = 3, isAnswerCorrect = false),
+            MongoAnswer(answerText = "1990", answerPosition = 4, isAnswerCorrect = true)
         )
 
         val questionSix = MongoQuestion(
@@ -201,11 +204,11 @@ object RandomQuestionnaireCreatorUtil {
 
 
         val answersQuestionSeven = listOf(
-            MongoAnswer(answerText = "onCreate", isAnswerCorrect = true),
-            MongoAnswer(answerText = "onWait", isAnswerCorrect = false),
-            MongoAnswer(answerText = "onInitialized", isAnswerCorrect = false),
-            MongoAnswer(answerText = "onResumed", isAnswerCorrect = true),
-            MongoAnswer(answerText = "onRecreated", isAnswerCorrect = false)
+            MongoAnswer(answerText = "onCreate", answerPosition = 0, isAnswerCorrect = true),
+            MongoAnswer(answerText = "onWait", answerPosition = 1, isAnswerCorrect = false),
+            MongoAnswer(answerText = "onInitialized", answerPosition = 2, isAnswerCorrect = false),
+            MongoAnswer(answerText = "onResumed", answerPosition = 3, isAnswerCorrect = true),
+            MongoAnswer(answerText = "onRecreated", answerPosition = 4, isAnswerCorrect = false)
         )
 
         val questionSeven = MongoQuestion(

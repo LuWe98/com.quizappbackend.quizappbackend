@@ -22,12 +22,15 @@ object JwtAuth {
     private const val REALM = "QuizAppRealm"
     private const val SUBJECT = "JWTAuthentication"
     private const val ISSUER = "QuizAppBackend"
-    private const val SECRET = "My Secret"
+    private const val SECRET = "167d7dda07649ad1a58486c28042a685b128125923cecd14c14dd7aa70027452"
 
+    //TODO -> Später über environment Variablen die Daten holen
 //    private val REALM = System.getenv()["JWT_REALM"]!!
 //    private val SUBJECT = System.getenv()["JWT_SUBJECT"]!!
 //    private val ISSUER = System.getenv()["JWT_ISSUER"]!!
 //    private val SECRET = System.getenv()["JWT_SECRET"]!!
+
+
     private val ALGORITHM: Algorithm = Algorithm.HMAC512(SECRET)
     private val expirationDate get() = Date(getTimeMillis() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS))
 
@@ -59,7 +62,8 @@ object JwtAuth {
     val JWTPrincipal.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
 
 
-    fun generateToken(user: User): String = JWT.create()
+    fun generateToken(user: User): String = JWT
+        .create()
         .withSubject(SUBJECT)
         .withIssuer(ISSUER)
         .withClaim(CLAIM_USER_ID, user.id)

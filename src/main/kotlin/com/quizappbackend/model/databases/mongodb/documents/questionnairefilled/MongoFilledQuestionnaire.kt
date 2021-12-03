@@ -4,11 +4,12 @@ import com.quizappbackend.model.databases.mongodb.documents.DocumentMarker
 import kotlinx.serialization.Serializable
 import org.bson.types.ObjectId
 
+//TODO -> filled questionnaire anschauen, wegen userId umändern mit copy
 @Serializable
 data class MongoFilledQuestionnaire(
-    var questionnaireId: String = ObjectId().toHexString(),
-    var userId: String = ObjectId().toHexString(),
-    var questions: List<MongoFilledQuestion> = emptyList()
+    val questionnaireId: String = ObjectId().toHexString(),
+    val userId: String = ObjectId().toHexString(),
+    val questions: List<MongoFilledQuestion> = emptyList()
 ) : DocumentMarker
 
 

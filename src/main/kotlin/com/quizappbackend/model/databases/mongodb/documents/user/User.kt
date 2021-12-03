@@ -8,13 +8,13 @@ import org.bson.types.ObjectId
 
 @Serializable
 data class User(
-    @BsonId var id: String = ObjectId().toHexString(),
-    var userName: String,
-    var password: String,
-    var role: Role,
-    var lastModifiedTimestamp : Long = getTimeMillis()
+    @BsonId val id: String = ObjectId().toHexString(),
+    val userName: String,
+    val password: String = "",
+    val role: Role,
+    val lastModifiedTimestamp : Long = getTimeMillis()
 ) : DocumentMarker {
 
-    val asAuthorInfo get() = AuthorInfo(id, userName)
+    fun asAuthorInfo() = AuthorInfo(id, userName)
 
 }

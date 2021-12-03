@@ -19,7 +19,7 @@ class UserDao(override var collection: CoroutineCollection<User>) : BaseDao<User
             ManageUsersOrderBy.ROLE -> User::role
         }
 
-        return collection
+        val list = collection
             .find(
                 and(
                     User::userName regex searchQuery,
@@ -30,8 +30,12 @@ class UserDao(override var collection: CoroutineCollection<User>) : BaseDao<User
             .skip((page - 1) * limit)
             .limit(limit)
             .toList()
-            .map { it.apply { password = "" } }
+
+        println("LIST: $list")
+
+        return list
     }
+//            .projection(fields(exclude(User::password)))
 
     suspend fun getAuthorsPaged(limit: Int, page: Int, searchQuery: String) =
         collection.find(and(User::userName regex searchQuery, User::role `in` setOf(Role.CREATOR, Role.ADMIN)))

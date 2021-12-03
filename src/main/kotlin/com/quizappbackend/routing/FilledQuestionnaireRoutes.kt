@@ -133,7 +133,7 @@ private fun Route.registerCreateRandomFilledQuestionnairesRoute() = authenticate
             mongoRepository.getXAmountOfQuestionnaires(request.toInt())
         )
 
-        mongoRepository.insertMany(questionnaireList.onEach { it.userId = userPrinciple.userId }).let { acknowledged ->
+        mongoRepository.insertMany(questionnaireList.map { it.copy(userId = userPrinciple.userId) }).let { acknowledged ->
             call.respond(HttpStatusCode.OK, acknowledged)
         }
     }

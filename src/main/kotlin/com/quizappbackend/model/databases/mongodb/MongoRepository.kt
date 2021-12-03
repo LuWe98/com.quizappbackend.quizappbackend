@@ -173,16 +173,16 @@ class MongoRepository(
 
     //FILLED QUESTIONNAIRE QUERIES
     suspend fun insertFilledQuestionnaireIfNotAlreadyPresent(mongoFilledQuestionnaire: MongoFilledQuestionnaire, userId: String) =
-        filledQuestionnaireDao.insertFilledQuestionnaireIfNotAlreadyPresent(mongoFilledQuestionnaire.apply { this.userId = userId })
+        filledQuestionnaireDao.insertFilledQuestionnaireIfNotAlreadyPresent(mongoFilledQuestionnaire.copy(userId = userId))
 
     suspend fun deleteFilledQuestionnairesForUser(userId: String, questionnaireIds: List<String>) =
         filledQuestionnaireDao.deleteFilledQuestionnairesForUser(userId, questionnaireIds)
 
     suspend fun replaceOneFilledQuestionnaireWith(mongoFilledQuestionnaire: MongoFilledQuestionnaire, userId: String) =
-        filledQuestionnaireDao.replaceOneFilledQuestionnaireWith(mongoFilledQuestionnaire.apply { this.userId = userId })
+        filledQuestionnaireDao.replaceOneFilledQuestionnaireWith(mongoFilledQuestionnaire.copy(userId = userId))
 
     suspend fun replaceManyFilledQuestionnairesWith(mongoFilledQuestionnaires: List<MongoFilledQuestionnaire>, userId: String) =
-        filledQuestionnaireDao.replaceManyFilledQuestionnairesWith(mongoFilledQuestionnaires.onEach { it.userId = userId })
+        filledQuestionnaireDao.replaceManyFilledQuestionnairesWith(mongoFilledQuestionnaires.map { it.copy(userId = userId) })
 
     suspend fun getFilledQuestionnaire(userId: String, questionnaireId: String) = filledQuestionnaireDao.getFilledQuestionnaire(userId, questionnaireId)
 

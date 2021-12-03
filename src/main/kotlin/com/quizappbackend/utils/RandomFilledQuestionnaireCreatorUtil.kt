@@ -12,13 +12,14 @@ object RandomFilledQuestionnaireCreatorUtil {
         mongoQuestionnaires : List<MongoQuestionnaire>,
     ): List<MongoFilledQuestionnaire> {
         return mongoQuestionnaires.map {
-            MongoFilledQuestionnaire(it.id, userId).apply {
-                val mongoFilledQuestion = it.questions.map { question ->
+            MongoFilledQuestionnaire(
+                questionnaireId = it.id,
+                userId = userId,
+                questions = it.questions.map { question ->
                     val filledAnswers = question.answers.filter { Random.nextBoolean() }.map { answer -> answer.id }
                     MongoFilledQuestion(questionId = question.id, selectedAnswerIds = filledAnswers)
                 }
-                questions = mongoFilledQuestion
-            }
+            )
         }.toList()
     }
 }

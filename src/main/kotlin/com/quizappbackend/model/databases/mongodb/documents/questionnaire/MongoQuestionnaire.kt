@@ -11,15 +11,15 @@ import org.bson.types.ObjectId
 
 @Serializable
 data class MongoQuestionnaire(
-    @BsonId var id: String = ObjectId().toHexString(),
-    var title: String,
-    var authorInfo: AuthorInfo,
-    var facultyIds: List<String> = emptyList(),
-    var courseOfStudiesIds: List<String> = emptyList(),
-    var subject: String,
-    var questions: List<MongoQuestion> = emptyList(),
-    var questionnaireVisibility: QuestionnaireVisibility = QuestionnaireVisibility.PRIVATE,
-    var lastModifiedTimestamp: Long = getTimeMillis()
+    @BsonId val id: String = ObjectId().toHexString(),
+    val title: String,
+    val authorInfo: AuthorInfo,
+    val facultyIds: List<String> = emptyList(),
+    val courseOfStudiesIds: List<String> = emptyList(),
+    val subject: String,
+    val questions: List<MongoQuestion> = emptyList(),
+    val questionnaireVisibility: QuestionnaireVisibility = QuestionnaireVisibility.PRIVATE,
+    val lastModifiedTimestamp: Long = getTimeMillis()
 ) : DocumentMarker {
 
     fun asMongoQuestionnaireBrowse() =

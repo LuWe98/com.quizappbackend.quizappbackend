@@ -6,6 +6,7 @@ import com.quizappbackend.di.KoinModules
 import com.quizappbackend.logging.registerStatusPages
 import com.quizappbackend.model.databases.mongodb.MongoRepository
 import com.quizappbackend.routing.*
+import com.quizappbackend.utils.generateRandomHex
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
