@@ -10,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.http.auth.*
 import io.ktor.response.*
 
-fun StatusPages.Configuration.registerStatusPages(){
+fun StatusPages.Configuration.registerStatusPages() {
 
     exception<ContentTransformationException> { exception ->
         logError(exception)
@@ -28,15 +28,17 @@ fun StatusPages.Configuration.registerStatusPages(){
     }
 
     exception<UserCredentialsChangedException> { exception ->
-//        logError(exception)
         call.respond(HttpStatusCode.BadRequest, exception.userInfoError)
     }
 
     exception<UnauthorizedException> { exception ->
-//        logError(exception)
-        call.respond(UnauthorizedResponse(HttpAuthHeader.Parameterized(
-            exception.schema,
-            mapOf(HttpAuthHeader.Parameters.Realm to exception.realm)))
+        call.respond(
+            UnauthorizedResponse(
+                HttpAuthHeader.Parameterized(
+                    exception.schema,
+                    mapOf(HttpAuthHeader.Parameters.Realm to exception.realm)
+                )
+            )
         )
     }
 

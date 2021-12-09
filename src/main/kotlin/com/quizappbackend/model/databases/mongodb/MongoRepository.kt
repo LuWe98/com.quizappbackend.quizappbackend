@@ -1,14 +1,15 @@
 package com.quizappbackend.model.databases.mongodb
 
-import com.quizappbackend.model.databases.dto.CourseOfStudiesIdWithTimeStamp
-import com.quizappbackend.model.databases.dto.FacultyIdWithTimeStamp
-import com.quizappbackend.model.databases.mongodb.dao.*
-import com.quizappbackend.model.databases.mongodb.documents.DocumentMarker
-import com.quizappbackend.model.databases.mongodb.documents.faculty.*
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
 import com.quizappbackend.model.databases.QuestionnaireVisibility
 import com.quizappbackend.model.databases.dto.BrowsableOrderBy
+import com.quizappbackend.model.databases.dto.CourseOfStudiesIdWithTimeStamp
+import com.quizappbackend.model.databases.dto.FacultyIdWithTimeStamp
 import com.quizappbackend.model.databases.dto.ManageUsersOrderBy
+import com.quizappbackend.model.databases.mongodb.dao.*
+import com.quizappbackend.model.databases.mongodb.documents.DocumentMarker
+import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
+import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
+import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
 import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestionnaire
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorId
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
@@ -16,7 +17,6 @@ import com.quizappbackend.model.databases.mongodb.documents.user.Role
 import com.quizappbackend.model.databases.mongodb.documents.user.User
 import com.quizappbackend.model.networking.requests.SyncQuestionnairesRequest
 import com.quizappbackend.model.networking.responses.SyncQuestionnairesResponse
-import com.quizappbackend.utils.Constants
 import com.quizappbackend.utils.DataPrefillUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -25,11 +25,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.bson.conversions.Bson
 import org.litote.kmongo.*
-import org.litote.kmongo.MongoOperator.*
-import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.aggregate
 import org.litote.kmongo.coroutine.projection
-import java.time.Instant
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
@@ -45,10 +42,14 @@ class MongoRepository(
     init {
         CoroutineScope(IO).launch {
             if (facultyDao.isCollectionEmpty() && courseOfStudiesDao.isCollectionEmpty()) {
-                DataPrefillUtil.generateFacultiesAndCoursesOfStudies().let { (faculties, coursesOfStudies) ->
-                    facultyDao.prefillFaculties(faculties)
-                    courseOfStudiesDao.prefillCourseOfStudies(coursesOfStudies)
+                DataPrefillUtil.facultiesAndCoursesOfStudies.let { (faculties, coursesOfStudies) ->
+                    insertMany(faculties)
+                    insertMany(coursesOfStudies)
                 }
+            }
+
+            if(userDao.isCollectionEmpty()) {
+                insertMany(DataPrefillUtil.professorListShortened)
             }
         }
     }
@@ -123,8 +124,10 @@ class MongoRepository(
 
     suspend fun updateUserRole(userId: String, role: Role) = userDao.updateUserRole(userId, role)
 
+    suspend fun changeUserPassword(userId: String, newPassword: String) = userDao.changeUserPassword(userId, newPassword)
 
-    //QUESTIONNAIRE QUERIES
+
+        //QUESTIONNAIRE QUERIES
     suspend fun findQuestionnairesWith(filledQuestionnaires: List<MongoFilledQuestionnaire>) =
         findManyByIds(filledQuestionnaires.map(MongoFilledQuestionnaire::questionnaireId), MongoQuestionnaire::id)
 
@@ -148,7 +151,7 @@ class MongoRepository(
         facultyIds: List<String>,
         courseOfStudiesIds: List<String>,
         authorIds: List<String>,
-        browsableOrderBy: BrowsableOrderBy,
+        orderBy: BrowsableOrderBy,
         ascending: Boolean
     ) = questionnaireDao.getQuestionnairesPaged(
         userId = userId,
@@ -159,7 +162,7 @@ class MongoRepository(
         facultyIds = facultyIds,
         courseOfStudiesIds = courseOfStudiesIds,
         authorIds = authorIds,
-        browsableOrderBy = browsableOrderBy,
+        orderBy = orderBy,
         ascending = ascending
     )
 
@@ -212,6 +215,8 @@ class MongoRepository(
 
     suspend fun isFacultyNameAlreadyUsed(faculty: MongoFaculty) = facultyDao.isFacultyNameAlreadyUsed(faculty)
 
+    suspend fun findFacultyWithAbbreviation(abbreviation: String) = facultyDao.findFacultyWithAbbreviation(abbreviation)
+
 
     //COURSE OF STUDIES
     suspend fun generateSyncCoursesOfStudiesResponse(courseOfStudiesIdsWithTimeStamps: List<CourseOfStudiesIdWithTimeStamp>) =
@@ -220,6 +225,8 @@ class MongoRepository(
     suspend fun insertOrReplaceCourseOfStudies(courseOfStudies: MongoCourseOfStudies) = replaceOneById(courseOfStudies, courseOfStudies.id, true)
 
     suspend fun isCourseOfStudiesAbbreviationAlreadyUsed(courseOfStudies: MongoCourseOfStudies) = courseOfStudiesDao.isCourseOfStudiesAbbreviationAlreadyUsed(courseOfStudies)
+
+    suspend fun getCourseOfStudiesForFaculty(facultyId: String) = courseOfStudiesDao.getCourseOfStudiesForFaculty(facultyId)
 
 
     //NEW METHOD
@@ -293,24 +300,6 @@ class MongoRepository(
 
 
 
-
-
-
-
-
-
-
-
-
-    data class Answer(val evaluator: String, val alreadyUsed: Boolean, val answerDate: Instant)
-
-    data class EvaluationsForms(val questions: List<String>)
-
-    data class EvaluationsFormsWithResults(val questions: List<String>, val results: List<EvaluationRequest>)
-
-    data class EvaluationsAnswers(val questionId: String, val evaluated: String, val answers: List<Answer>)
-
-    data class EvaluationRequest(val userId: String, val evaluationDate: String)
 
 
     suspend fun findUnconnectedQuestionnaires(): List<Any> {

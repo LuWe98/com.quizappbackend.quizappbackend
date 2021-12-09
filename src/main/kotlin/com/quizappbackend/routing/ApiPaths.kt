@@ -13,6 +13,7 @@ sealed class ApiPaths {
         const val DELETE_SELF = "/user/delete"
         const val DELETE_USER = "/admin/users/delete"
         const val AUTHORS_PAGED = "/authors/paged"
+        const val CHANGE_PASSWORD = "/user/changepassword"
         const val USERS_PAGED_ADMIN = "/admin/users/paged"
         const val GENERATE_RANDOM = "/user/random"
     }
@@ -27,10 +28,6 @@ sealed class ApiPaths {
         const val SYNC = "/courseOfStudies/sync"
         const val INSERT = "/admin/courseOfStudies/insert"
         const val DELETE = "/admin/courseOfStudies/delete"
-    }
-
-    object SubjectPaths : ApiPaths() {
-
     }
 
     object QuestionnairePaths : ApiPaths() {

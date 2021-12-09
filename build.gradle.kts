@@ -47,9 +47,6 @@ dependencies {
     implementation("io.ktor:ktor-serialization:$ktorVersion")
     implementation("io.ktor:ktor-network-tls-certificates:$ktorVersion")
 
-    implementation("io.ktor:ktor-html-builder:$ktorVersion")
-    implementation("io.ktor:ktor-freemarker:$ktorVersion")
-
 
     //Coroutine
     val coroutineCoreVersion: String by project

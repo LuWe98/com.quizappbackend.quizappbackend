@@ -15,6 +15,7 @@ import com.quizappbackend.model.networking.responses.SyncUserDataResponse.SyncUs
 import com.quizappbackend.model.networking.responses.UpdateUserResponse.UpdateUserResponseType
 import com.quizappbackend.model.databases.mongodb.documents.user.Role
 import com.quizappbackend.model.databases.mongodb.documents.user.User
+import com.quizappbackend.model.networking.responses.ChangePasswordResponse.*
 import com.quizappbackend.model.networking.responses.CreateUserResponse.*
 import com.quizappbackend.mongoRepository
 import com.quizappbackend.routing.ApiPaths.*
@@ -35,6 +36,7 @@ fun Routing.registerUserRoutes() {
     registerDeleteOwnUserRoute()
     registerGetPagedUsersRoute()
     registerGetPagedUsersAdminRoute()
+    registerChangePasswordRoute()
     registerUpdateUserRoleRoute()
     registerDeleteUsersRoute()
     registerCreateGenericUsers()
@@ -87,9 +89,7 @@ private fun Route.registerRegisterRoute() = post(UserPaths.REGISTER) {
 }
 
 private fun Route.refreshTokenRoute() = post(UserPaths.REFRESH_TOKEN) {
-
     val request = call.receive<RefreshJwtTokenRequest>()
-
     mongoRepository.getUserWithUserName(request.userName)?.let { user ->
         if (request.password.matchesHash(user.password)) {
             call.respond(HttpStatusCode.OK, RefreshJwtTokenResponse(JwtAuth.generateToken(user)))
@@ -170,6 +170,29 @@ private fun Route.registerGetPagedUsersRoute() = authenticate {
         ).let { authors ->
             call.respond(HttpStatusCode.OK, authors)
         }
+    }
+}
+
+
+private fun Route.registerChangePasswordRoute() = authenticate {
+    post(UserPaths.CHANGE_PASSWORD) {
+        val request = call.receive<ChangePasswordRequest>()
+
+        mongoRepository.changeUserPassword(userPrinciple.userId, request.newPassword.generateHash()).let { wasAcknowledged ->
+            if (wasAcknowledged) {
+                mongoRepository.findOneById<User>(userPrinciple.userId)?.let { user ->
+                    call.respond(
+                        ChangePasswordResponse(
+                            JwtAuth.generateToken(user),
+                            ChangePasswordResponseType.SUCCESSFUL
+                        )
+                    )
+                    return@post
+                }
+            }
+        }
+
+        call.respond(ChangePasswordResponse(responseType = ChangePasswordResponseType.NOT_ACKNOWLEDGED))
     }
 }
 

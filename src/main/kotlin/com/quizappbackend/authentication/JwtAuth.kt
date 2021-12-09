@@ -30,12 +30,14 @@ object JwtAuth {
 //    private val ISSUER = System.getenv()["JWT_ISSUER"]!!
 //    private val SECRET = System.getenv()["JWT_SECRET"]!!
 
-
     private val ALGORITHM: Algorithm = Algorithm.HMAC512(SECRET)
     private val expirationDate get() = Date(getTimeMillis() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS))
 
+    const val ADMIN_ROUTE = "adminRoute"
+
     private const val CLAIM_USER_ID = "userId"
     private const val CLAIM_USER_NAME = "userName"
+    private const val CLAIM_HASHED_PW = "hashedPw"
     private const val CLAIM_USER_ROLE = "userRole"
 
 
@@ -43,7 +45,6 @@ object JwtAuth {
     private const val ERROR_CAUSE_USER_DOES_NOT_EXIST = "errorCauseUserDoesNotExists"
     private const val ERROR_CAUSE_USER_ROLE_CHANGED = "errorCauseUserRoleChanged"
 
-    const val ADMIN_ROUTE = "adminRoute"
 
     private val PipelineContext<*, ApplicationCall>.userPrincipleOptional get() = call.principal<JWTPrincipal>()
 
@@ -53,6 +54,8 @@ object JwtAuth {
 
     val JWTCredential.userName: String get() = payload.getClaim(CLAIM_USER_NAME).asString()
 
+    val JWTCredential.userHashedPassword: String get() = payload.getClaim(CLAIM_HASHED_PW).asString()
+
     val JWTCredential.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
 
     val JWTPrincipal.userId: String get() = payload.getClaim(CLAIM_USER_ID).asString()
@@ -61,52 +64,48 @@ object JwtAuth {
 
     val JWTPrincipal.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
 
+    val JWTPrincipal.userHashedPassword: String get() = payload.getClaim(CLAIM_HASHED_PW).asString()
 
-    fun generateToken(user: User): String = JWT
+
+    fun generateToken(user: User): String = generateToken(
+        user.id,
+        user.userName,
+        user.password,
+        user.role
+    )
+
+    private fun generateToken(
+        userId: String,
+        userName: String,
+        hashedPw: String,
+        role: Role
+    ): String = JWT
         .create()
         .withSubject(SUBJECT)
         .withIssuer(ISSUER)
-        .withClaim(CLAIM_USER_ID, user.id)
-        .withClaim(CLAIM_USER_NAME, user.userName)
-        .withClaim(CLAIM_USER_ROLE, user.role.name)
+        .withClaim(CLAIM_USER_ID, userId)
+        .withClaim(CLAIM_USER_NAME, userName)
+        .withClaim(CLAIM_HASHED_PW, hashedPw)
+        .withClaim(CLAIM_USER_ROLE, role.name)
         .withExpiresAt(expirationDate)
         .sign(ALGORITHM)
 
+
     private val jwtVerifier: JWTVerifier = JWT
-            .require(ALGORITHM)
-            .withIssuer(ISSUER)
-            .build()
+        .require(ALGORITHM)
+        .withIssuer(ISSUER)
+        .build()
 
 
     fun Authentication.Configuration.registerJwtAuthentication() = jwt {
-        realm = REALM
-        verifier(jwtVerifier)
-
-        validate { credentials ->
-            mongoRepository.findOneById<User>(credentials.userId).let { user ->
-                if (user == null) {
-                    authentication.error(ERROR_CAUSE_USER_DOES_NOT_EXIST, Error(ERROR_CAUSE_USER_DOES_NOT_EXIST))
-                    return@let null
-                }
-
-                if (user.userName != credentials.userName) {
-                    authentication.error(ERROR_CAUSE_USER_CREDENTIALS_CHANGED, Error(ERROR_CAUSE_USER_CREDENTIALS_CHANGED))
-                    return@let null
-                }
-
-                if(user.role != credentials.userRole){
-                    authentication.error(ERROR_CAUSE_USER_ROLE_CHANGED, Error(ERROR_CAUSE_USER_ROLE_CHANGED))
-                    return@let null
-                }
-
-                JWTPrincipal(credentials.payload)
-            }
-        }
-
-        initChallenge()
+        initAuthentication()
     }
 
     fun Authentication.Configuration.registerJwtAdminAuthentication() = jwt(ADMIN_ROUTE) {
+        initAuthentication(true)
+    }
+
+    private fun JWTAuthenticationProvider.Configuration.initAuthentication(adminAuthentication: Boolean = false) {
         realm = REALM
         verifier(jwtVerifier)
 
@@ -117,17 +116,17 @@ object JwtAuth {
                     return@let null
                 }
 
-                if (user.userName != credentials.userName) {
+                if (user.userName != credentials.userName || user.password != credentials.userHashedPassword) {
                     authentication.error(ERROR_CAUSE_USER_CREDENTIALS_CHANGED, Error(ERROR_CAUSE_USER_CREDENTIALS_CHANGED))
                     return@let null
                 }
 
-                if(user.role != credentials.userRole){
+                if (user.role != credentials.userRole) {
                     authentication.error(ERROR_CAUSE_USER_ROLE_CHANGED, Error(ERROR_CAUSE_USER_ROLE_CHANGED))
                     return@let null
                 }
 
-                if (user.role != Role.ADMIN) {
+                if (adminAuthentication && user.role != Role.ADMIN) {
                     return@let null
                 }
 
@@ -135,21 +134,16 @@ object JwtAuth {
             }
         }
 
-        initChallenge()
-    }
-
-    private fun JWTAuthenticationProvider.Configuration.initChallenge(){
         challenge { schema, _ ->
-
-            if(call.authentication.allErrors.isEmpty() || call.authentication.allErrors.any{ it.message == ERROR_CAUSE_USER_ROLE_CHANGED }){
+            if (call.authentication.allErrors.isEmpty() || call.authentication.allErrors.any { it.message == ERROR_CAUSE_USER_ROLE_CHANGED }) {
                 throw UnauthorizedException(schema, realm)
             }
 
-            if(call.authentication.allErrors.any { it.message == ERROR_CAUSE_USER_CREDENTIALS_CHANGED }){
+            if (call.authentication.allErrors.any { it.message == ERROR_CAUSE_USER_CREDENTIALS_CHANGED }) {
                 throw UserCredentialsChangedException(CREDENTIALS_CHANGED)
             }
 
-            if(call.authentication.allErrors.any { it.message == ERROR_CAUSE_USER_DOES_NOT_EXIST }){
+            if (call.authentication.allErrors.any { it.message == ERROR_CAUSE_USER_DOES_NOT_EXIST }) {
                 throw UserCredentialsChangedException(USER_DOES_NOT_EXIST)
             }
         }

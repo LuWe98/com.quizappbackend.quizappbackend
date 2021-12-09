@@ -49,7 +49,6 @@ private fun Routing.registerInsertCourseOfStudiesRoute() = authenticate(JwtAuth.
 
         mongoRepository.insertOrReplaceCourseOfStudies(request.courseOfStudies).let { wasAcknowledged ->
             call.respond(
-                HttpStatusCode.OK,
                 InsertCourseOfStudiesResponse(
                     if (wasAcknowledged) InsertCourseOfStudiesResponseType.SUCCESSFUL
                     else InsertCourseOfStudiesResponseType.NOT_ACKNOWLEDGED
@@ -65,7 +64,6 @@ private fun Routing.registerDeleteCourseOfStudiesRoute() = authenticate(JwtAuth.
 
         mongoRepository.deleteOneById<MongoCourseOfStudies>(request.courseOfStudiesId).let { wasAcknowledged ->
             call.respond(
-                HttpStatusCode.OK,
                 DeleteCourseOfStudiesResponse(
                     if (wasAcknowledged) DeleteCourseOfStudiesResponseType.SUCCESSFUL
                     else DeleteCourseOfStudiesResponseType.NOT_ACKNOWLEDGED

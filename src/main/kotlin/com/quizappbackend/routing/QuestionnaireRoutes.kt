@@ -13,7 +13,7 @@ import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQ
 import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestionnaire
 import com.quizappbackend.mongoRepository
 import com.quizappbackend.routing.ApiPaths.*
-import com.quizappbackend.utils.RandomQuestionnaireCreatorUtil
+import com.quizappbackend.utils.QuestionnaireCreatorUtil
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -96,7 +96,7 @@ private fun Route.registerGetPagedQuestionnairesRoute() = authenticate {
                 facultyIds = request.facultyIds,
                 courseOfStudiesIds = request.courseOfStudiesIds,
                 authorIds = request.authorIds,
-                browsableOrderBy = request.browsableOrderBy,
+                orderBy = request.browsableOrderBy,
                 ascending = request.ascending
             )
         )
@@ -154,17 +154,15 @@ private fun Route.registerShareQuestionnaireRoute() = authenticate {
             }
 
             mongoRepository.getFilledQuestionnaire(user.id, request.questionnaireId)?.let {
-                call.respond(ShareQuestionnaireWithUserResponse( ShareQuestionnaireWithUserResponseType.ALREADY_SHARED_WITH_USER))
+                call.respond(ShareQuestionnaireWithUserResponse(ShareQuestionnaireWithUserResponseType.ALREADY_SHARED_WITH_USER))
                 return@post
             }
 
             mongoRepository.insertFilledQuestionnaireIfNotAlreadyPresent(MongoFilledQuestionnaire(request.questionnaireId), user.id).let { result ->
                 call.respond(
                     ShareQuestionnaireWithUserResponse(
-                        when {
-                            result.wasAcknowledged() -> ShareQuestionnaireWithUserResponseType.SUCCESSFUL
-                            else -> ShareQuestionnaireWithUserResponseType.NOT_ACKNOWLEDGED
-                        }
+                        if(result.wasAcknowledged()) ShareQuestionnaireWithUserResponseType.SUCCESSFUL
+                        else ShareQuestionnaireWithUserResponseType.NOT_ACKNOWLEDGED
                     )
                 )
                 return@post
@@ -179,7 +177,7 @@ private fun Route.registerCreateRandomQuestionnairesRoute() = authenticate {
     post(QuestionnairePaths.GENERATE_RANDOM) {
         val request = call.receive<String>()
 
-        val questionnaireList = RandomQuestionnaireCreatorUtil.generateRandomData(
+        val questionnaireList = QuestionnaireCreatorUtil.generateRandomData(
             userPrinciple,
             request.toInt(),
             minQuestionsPerQuestionnaire = 10,
@@ -195,7 +193,7 @@ private fun Route.registerCreateRandomQuestionnairesRoute() = authenticate {
 
 private fun Route.registerCreateReadableExampleQuestionnaires() = authenticate {
     post("/questionnaire/readable") {
-        call.respond(HttpStatusCode.OK, mongoRepository.insertMany(RandomQuestionnaireCreatorUtil.generateReadableQuestionnaires(userPrinciple)))
+        call.respond(HttpStatusCode.OK, mongoRepository.insertMany(QuestionnaireCreatorUtil.generateReadableQuestionnaires(userPrinciple)))
     }
 }
 

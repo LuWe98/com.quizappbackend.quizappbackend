@@ -25,29 +25,12 @@ class QuestionnaireDao(
             set(MongoQuestionnaire::questionnaireVisibility setTo newVisibility)
         ).wasAcknowledged()
 
-
-    suspend fun getQuestionnairesNotForUser(userId: String, questionnairesToFind: List<String>) =
-        collection.find(and(MongoQuestionnaire::authorInfo / AuthorInfo::userId ne userId, MongoQuestionnaire::id `in` questionnairesToFind)).toList()
-
-
-    suspend fun getQuestionnairesWith(userId: String, questionnairesToIgnore: List<String>, questionnairesToFind: List<String>) =
-        collection.find(
-            or(
-                and(MongoQuestionnaire::authorInfo / AuthorInfo::userId eq userId, MongoQuestionnaire::id nin questionnairesToIgnore),
-                MongoQuestionnaire::id `in` questionnairesToFind
-            )
-        ).toList()
-
     suspend fun updateAuthorNameInQuestionnaires(userId: String, newUserName: String) =
         collection.updateMany(
             MongoQuestionnaire::authorInfo / AuthorInfo::userId eq userId,
             setValue(MongoQuestionnaire::authorInfo / AuthorInfo::userName, newUserName)
         ).wasAcknowledged()
 
-
-    //TODO -> es nicht mit limit und skip machen
-    //TODO -> Suche für Namen, Subjects, CourseOfStudies machen
-    //TODO -> Alternative für SKIP LIMIT suchen
     suspend fun getQuestionnairesPaged(
         userId: String,
         limit: Int,
@@ -57,9 +40,10 @@ class QuestionnaireDao(
         facultyIds: List<String>,
         courseOfStudiesIds: List<String>,
         authorIds: List<String>,
-        browsableOrderBy: BrowsableOrderBy,
+        orderBy: BrowsableOrderBy,
         ascending: Boolean
     ): List<MongoBrowsableQuestionnaire> {
+
         val bsonFilters = mutableListOf(
             MongoQuestionnaire::questionnaireVisibility eq QuestionnaireVisibility.PUBLIC,
             MongoQuestionnaire::title regex searchQuery,
@@ -79,15 +63,9 @@ class QuestionnaireDao(
             bsonFilters.add(MongoQuestionnaire::authorInfo / AuthorInfo::userId `in` authorIds)
         }
 
-        val orderByProperty = when (browsableOrderBy) {
-            BrowsableOrderBy.TITLE -> MongoQuestionnaire::title
-            BrowsableOrderBy.AUTHOR_NAME -> MongoQuestionnaire::authorInfo / AuthorInfo::userName
-            BrowsableOrderBy.LAST_UPDATED -> MongoQuestionnaire::lastModifiedTimestamp
-        }
-
         return collection
             .find(and(bsonFilters))
-            .sort(orderBy(orderByProperty, ascending = ascending))
+            .sort(orderBy(orderBy.orderByProperty, ascending = ascending))
             .skip(kotlin.math.max((page - 1) * limit, 0))
             .projection(fields(exclude(MongoQuestionnaire::questions / MongoQuestion::answers)))
             .limit(limit)
@@ -97,6 +75,7 @@ class QuestionnaireDao(
     //.withDocumentClass<MongoBrowsableQuestionnaire>()
     //.map(MongoQuestionnaire::asMongoQuestionnaireBrowse)
 
+    //TODO -> Mit Bucket statt Skip Limit?
     suspend fun getQuestionnairesPagedBucket(userId: String, limit: Int, page: Int, searchQuery: String): List<MongoQuestionnaire> {
         val group = group(MongoQuestionnaire::id)
         val bucket = bucket(group, mutableListOf(0, limit), BucketOptions())

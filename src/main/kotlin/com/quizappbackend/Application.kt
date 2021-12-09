@@ -6,7 +6,6 @@ import com.quizappbackend.di.KoinModules
 import com.quizappbackend.logging.registerStatusPages
 import com.quizappbackend.model.databases.mongodb.MongoRepository
 import com.quizappbackend.routing.*
-import com.quizappbackend.utils.generateRandomHex
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -24,6 +23,7 @@ lateinit var mongoRepository: MongoRepository
 
 @Suppress("unused")
 fun Application.module() {
+
     install(DefaultHeaders)
 
     install(CallLogging) {
@@ -57,12 +57,5 @@ fun Application.module() {
         registerFilledQuestionnaireRoutes()
         registerFacultyRoutes()
         registerCourseOfStudiesRoutes()
-        registerSubjectRoutes()
     }
 }
-
-//    install(Sessions){
-//        cookie<UserPrinciple>("user_session"){
-//            cookie.maxAgeInSeconds = 60
-//        }
-//    }

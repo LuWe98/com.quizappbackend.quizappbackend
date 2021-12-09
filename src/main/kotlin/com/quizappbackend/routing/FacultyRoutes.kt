@@ -68,7 +68,6 @@ private fun Routing.registerDeleteFacultyRoute() = authenticate(JwtAuth.ADMIN_RO
 
         mongoRepository.deleteFacultyById(request.facultyId).let { wasAcknowledged ->
             call.respond(
-                HttpStatusCode.OK,
                 DeleteFacultyResponse(
                     if (wasAcknowledged) DeleteFacultyResponseType.SUCCESSFUL
                     else DeleteFacultyResponseType.NOT_ACKNOWLEDGED

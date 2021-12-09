@@ -11,7 +11,7 @@ data class User(
     @BsonId val id: String = ObjectId().toHexString(),
     val userName: String,
     val password: String = "",
-    val role: Role,
+    val role: Role = Role.USER,
     val lastModifiedTimestamp : Long = getTimeMillis()
 ) : DocumentMarker {
 

@@ -13,40 +13,41 @@ class UserDao(override var collection: CoroutineCollection<User>) : BaseDao<User
 
     suspend fun getUserWithUserName(userName: String) = collection.findOne(User::userName eq userName)
 
-    suspend fun getUsersPaged(limit: Int, page: Int, searchQuery: String, roles: Set<Role>, orderBy: ManageUsersOrderBy, ascending: Boolean): List<User> {
-        val orderByProperty = when (orderBy) {
-            ManageUsersOrderBy.USER_NAME -> User::userName
-            ManageUsersOrderBy.ROLE -> User::role
-        }
-
-        val list = collection
+    suspend fun getUsersPaged(limit: Int, page: Int, searchQuery: String, roles: Set<Role>, orderBy: ManageUsersOrderBy, ascending: Boolean): List<User> =
+        collection
             .find(
                 and(
                     User::userName regex searchQuery,
                     User::role `in` roles
                 )
             )
-            .sort(orderBy(orderByProperty, ascending = ascending))
+            .projection(exclude(User::password))
+            .sort(orderBy(orderBy.orderByProperty, ascending = ascending))
             .skip((page - 1) * limit)
             .limit(limit)
             .toList()
 
-        println("LIST: $list")
-
-        return list
-    }
-//            .projection(fields(exclude(User::password)))
-
-    suspend fun getAuthorsPaged(limit: Int, page: Int, searchQuery: String) =
-        collection.find(and(User::userName regex searchQuery, User::role `in` setOf(Role.CREATOR, Role.ADMIN)))
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .toList()
-            .map(User::asAuthorInfo)
+    suspend fun getAuthorsPaged(limit: Int, page: Int, searchQuery: String) = collection
+        .find(
+            and(
+                User::userName regex searchQuery,
+                User::role `in` setOf(Role.CREATOR, Role.ADMIN)
+            )
+        )
+        .projection(fields(include(User::id, User::userName)))
+        .sort(orderBy(User::userName, ascending = true))
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .toList()
+        .map(User::asAuthorInfo)
 
     suspend fun changeUserName(userId: String, newUserName: String) =
         collection.updateOne(User::id eq userId, set(User::userName setTo newUserName, User::lastModifiedTimestamp setTo getTimeMillis())).wasAcknowledged()
 
     suspend fun updateUserRole(userId: String, role: Role) =
         collection.updateOne(User::id eq userId, set(User::role setTo role, User::lastModifiedTimestamp setTo getTimeMillis())).wasAcknowledged()
+
+    suspend fun changeUserPassword(userId: String, newPassword: String) =
+        collection.updateOne(User::id eq userId, set(User::password setTo newPassword, User::lastModifiedTimestamp setTo getTimeMillis())).wasAcknowledged()
+
 }

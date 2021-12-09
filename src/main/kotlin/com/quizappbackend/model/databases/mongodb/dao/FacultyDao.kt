@@ -17,10 +17,7 @@ class FacultyDao(override var collection: CoroutineCollection<MongoFaculty>) : B
     suspend fun isFacultyNameAlreadyUsed(faculty: MongoFaculty) =
         collection.findOne(and(MongoFaculty::name eq faculty.name, MongoFaculty::id ne faculty.id)) != null
 
-    suspend fun prefillFaculties(faculties: List<MongoFaculty>) {
-        if (collection.estimatedDocumentCount() != 0L) return
-        insertMany(faculties)
-    }
+    suspend fun findFacultyWithAbbreviation(abbreviation: String) = collection.findOne(MongoFaculty::abbreviation eq abbreviation)
 
     suspend fun generateSyncFacultiesResponse(facultyIdWithTimeStamp: List<FacultyIdWithTimeStamp>): SyncFacultiesResponse = withContext(IO) {
         val localFacultyIds = facultyIdWithTimeStamp.map(FacultyIdWithTimeStamp::facultyId)

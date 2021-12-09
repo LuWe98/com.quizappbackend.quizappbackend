@@ -1,11 +1,8 @@
 package com.quizappbackend.model.databases.mongodb.dao
 
 import com.quizappbackend.model.databases.dto.CourseOfStudiesIdWithTimeStamp
-import com.quizappbackend.model.databases.dto.FacultyIdWithTimeStamp
 import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
 import com.quizappbackend.model.networking.responses.SyncCoursesOfStudiesResponse
-import com.quizappbackend.model.networking.responses.SyncFacultiesResponse
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -17,10 +14,7 @@ class CourseOfStudiesDao(override var collection: CoroutineCollection<MongoCours
     suspend fun isCourseOfStudiesAbbreviationAlreadyUsed(courseOfStudies: MongoCourseOfStudies) =
         collection.findOne(and(MongoCourseOfStudies::abbreviation eq courseOfStudies.abbreviation, MongoCourseOfStudies::id ne courseOfStudies.id)) != null
 
-    suspend fun prefillCourseOfStudies(coursesOfStudies: List<MongoCourseOfStudies>) {
-        if(collection.estimatedDocumentCount() != 0L) return
-        insertMany(coursesOfStudies)
-    }
+    suspend fun getCourseOfStudiesForFaculty(facultyId: String) = collection.find(MongoCourseOfStudies::facultyIds contains facultyId).toList()
 
     suspend fun generateSyncFacultiesResponse(courseOfStudiesIdsWithTimeStamps: List<CourseOfStudiesIdWithTimeStamp>) : SyncCoursesOfStudiesResponse = withContext(IO) {
         val localCourseOfStudiesIds = courseOfStudiesIdsWithTimeStamps.map(CourseOfStudiesIdWithTimeStamp::courseOfStudiesId)
@@ -54,5 +48,6 @@ class CourseOfStudiesDao(override var collection: CoroutineCollection<MongoCours
         or(courseOfStudiesIdsWithTimeStamps.map {
             and(MongoCourseOfStudies::id eq it.courseOfStudiesId, MongoCourseOfStudies::lastModifiedTimestamp ne it.lastModifiedTimestamp)
         })
+
 
 }

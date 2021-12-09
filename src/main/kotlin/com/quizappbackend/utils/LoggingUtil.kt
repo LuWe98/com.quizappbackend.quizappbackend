@@ -15,5 +15,5 @@ fun PipelineContext<*, ApplicationCall>.log(message : String) {
 }
 
 fun PipelineContext<*, ApplicationCall>.logError(throwable: Throwable) {
-    call.application.environment.log.error("TYPE: ${throwable.javaClass} - MESSAGE: ${throwable.message} - CAUSE: ${throwable.cause}\nSTACKTRACE: ${throwable.stackTraceToString()}")
+    call.application.environment.log.error("ERROR TYPE: ${throwable.javaClass} - MESSAGE: ${throwable.message} - CAUSE: ${throwable.cause}\nSTACKTRACE: ${throwable.stackTraceToString()}")
 }
