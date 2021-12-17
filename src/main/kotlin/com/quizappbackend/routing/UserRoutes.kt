@@ -6,6 +6,7 @@ import com.quizappbackend.authentication.JwtAuth.userPrinciple
 import com.quizappbackend.authentication.JwtAuth.userRole
 import com.quizappbackend.authentication.UserCredentialsChangedException
 import com.quizappbackend.authentication.UserCredentialsErrorType.*
+import com.quizappbackend.model.databases.mongodb.documents.user.User
 import com.quizappbackend.model.networking.requests.*
 import com.quizappbackend.model.networking.responses.*
 import com.quizappbackend.model.networking.responses.DeleteUserResponse.DeleteUserResponseType
@@ -14,7 +15,6 @@ import com.quizappbackend.model.networking.responses.RegisterUserResponse.Regist
 import com.quizappbackend.model.networking.responses.SyncUserDataResponse.SyncUserDataResponseType
 import com.quizappbackend.model.networking.responses.UpdateUserResponse.UpdateUserResponseType
 import com.quizappbackend.model.databases.mongodb.documents.user.Role
-import com.quizappbackend.model.databases.mongodb.documents.user.User
 import com.quizappbackend.model.networking.responses.ChangePasswordResponse.*
 import com.quizappbackend.model.networking.responses.CreateUserResponse.*
 import com.quizappbackend.mongoRepository
@@ -39,7 +39,6 @@ fun Routing.registerUserRoutes() {
     registerChangePasswordRoute()
     registerUpdateUserRoleRoute()
     registerDeleteUsersRoute()
-    registerCreateGenericUsers()
     registerSyncUserInfo()
     registerCreateUserRoute()
 }
@@ -275,16 +274,4 @@ private fun Route.registerCreateUserRoute() = authenticate(JwtAuth.ADMIN_ROUTE) 
             )
         }
     }
-}
-
-
-private fun Route.registerCreateGenericUsers() = post(UserPaths.GENERATE_RANDOM) {
-    val request = call.receive<String>().toInt()
-
-    for (index in 0..request) {
-        val user = User(userName = "Generic User $index", password = "1", role = Role.USER)
-        mongoRepository.insertOne(user)
-    }
-
-    call.respond(HttpStatusCode.OK)
 }

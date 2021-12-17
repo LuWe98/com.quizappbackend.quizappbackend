@@ -1,7 +1,7 @@
 package com.quizappbackend.model.databases.mongodb.dao
 
 import com.quizappbackend.model.databases.dto.FacultyIdWithTimeStamp
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
+import com.quizappbackend.model.databases.mongodb.documents.MongoFaculty
 import com.quizappbackend.model.networking.responses.SyncFacultiesResponse
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async

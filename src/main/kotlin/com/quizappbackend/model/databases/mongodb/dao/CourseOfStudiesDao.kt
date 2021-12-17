@@ -1,7 +1,7 @@
 package com.quizappbackend.model.databases.mongodb.dao
 
 import com.quizappbackend.model.databases.dto.CourseOfStudiesIdWithTimeStamp
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
+import com.quizappbackend.model.databases.mongodb.documents.MongoCourseOfStudies
 import com.quizappbackend.model.networking.responses.SyncCoursesOfStudiesResponse
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -48,6 +48,5 @@ class CourseOfStudiesDao(override var collection: CoroutineCollection<MongoCours
         or(courseOfStudiesIdsWithTimeStamps.map {
             and(MongoCourseOfStudies::id eq it.courseOfStudiesId, MongoCourseOfStudies::lastModifiedTimestamp ne it.lastModifiedTimestamp)
         })
-
 
 }

@@ -1,16 +1,12 @@
 package com.quizappbackend.model.databases.mongodb
 
 import com.quizappbackend.model.databases.QuestionnaireVisibility
-import com.quizappbackend.model.databases.dto.BrowsableOrderBy
+import com.quizappbackend.model.databases.dto.RemoteQuestionnaireOrderBy
 import com.quizappbackend.model.databases.dto.CourseOfStudiesIdWithTimeStamp
 import com.quizappbackend.model.databases.dto.FacultyIdWithTimeStamp
 import com.quizappbackend.model.databases.dto.ManageUsersOrderBy
 import com.quizappbackend.model.databases.mongodb.dao.*
-import com.quizappbackend.model.databases.mongodb.documents.DocumentMarker
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
-import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.*
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorId
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
 import com.quizappbackend.model.databases.mongodb.documents.user.Role
@@ -151,7 +147,7 @@ class MongoRepository(
         facultyIds: List<String>,
         courseOfStudiesIds: List<String>,
         authorIds: List<String>,
-        orderBy: BrowsableOrderBy,
+        orderBy: RemoteQuestionnaireOrderBy,
         ascending: Boolean
     ) = questionnaireDao.getQuestionnairesPaged(
         userId = userId,

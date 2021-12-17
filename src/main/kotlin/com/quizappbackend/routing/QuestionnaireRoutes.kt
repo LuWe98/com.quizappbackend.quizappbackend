@@ -9,8 +9,8 @@ import com.quizappbackend.model.networking.responses.DeleteQuestionnaireResponse
 import com.quizappbackend.model.networking.responses.GetQuestionnaireResponse.GetQuestionnaireResponseType
 import com.quizappbackend.model.networking.responses.InsertQuestionnairesResponse.InsertQuestionnairesResponseType
 import com.quizappbackend.model.networking.responses.ShareQuestionnaireWithUserResponse.ShareQuestionnaireWithUserResponseType
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
-import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.MongoFilledQuestionnaire
 import com.quizappbackend.mongoRepository
 import com.quizappbackend.routing.ApiPaths.*
 import com.quizappbackend.utils.QuestionnaireCreatorUtil
@@ -96,7 +96,7 @@ private fun Route.registerGetPagedQuestionnairesRoute() = authenticate {
                 facultyIds = request.facultyIds,
                 courseOfStudiesIds = request.courseOfStudiesIds,
                 authorIds = request.authorIds,
-                orderBy = request.browsableOrderBy,
+                orderBy = request.remoteQuestionnaireOrderBy,
                 ascending = request.ascending
             )
         )

@@ -1,7 +1,6 @@
-package com.quizappbackend.model.databases.mongodb.documents.questionnaire
+package com.quizappbackend.model.databases.mongodb.documents
 
 import com.quizappbackend.model.databases.QuestionnaireVisibility
-import com.quizappbackend.model.databases.mongodb.documents.DocumentMarker
 import com.quizappbackend.model.databases.dto.MongoBrowsableQuestionnaire
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
 import io.ktor.util.date.*

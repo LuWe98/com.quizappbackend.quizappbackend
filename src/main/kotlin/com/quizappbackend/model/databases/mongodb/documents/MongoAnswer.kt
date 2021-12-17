@@ -1,4 +1,4 @@
-package com.quizappbackend.model.databases.mongodb.documents.questionnaire
+package com.quizappbackend.model.databases.mongodb.documents
 
 import kotlinx.serialization.Serializable
 import org.bson.codecs.pojo.annotations.BsonId

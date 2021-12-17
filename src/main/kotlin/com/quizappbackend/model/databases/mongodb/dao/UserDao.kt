@@ -1,8 +1,8 @@
 package com.quizappbackend.model.databases.mongodb.dao
 
 import com.quizappbackend.model.databases.dto.ManageUsersOrderBy
-import com.quizappbackend.model.databases.mongodb.documents.user.Role
 import com.quizappbackend.model.databases.mongodb.documents.user.User
+import com.quizappbackend.model.databases.mongodb.documents.user.Role
 import io.ktor.util.date.*
 import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.CoroutineCollection

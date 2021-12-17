@@ -1,8 +1,8 @@
 package com.quizappbackend.utils
 
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
-import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestion
-import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.MongoFilledQuestion
+import com.quizappbackend.model.databases.mongodb.documents.MongoFilledQuestionnaire
 import kotlin.random.Random
 
 object RandomFilledQuestionnaireCreatorUtil {

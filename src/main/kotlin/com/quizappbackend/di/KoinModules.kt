@@ -2,10 +2,7 @@ package com.quizappbackend.di
 
 import com.quizappbackend.model.databases.mongodb.MongoRepository
 import com.quizappbackend.model.databases.mongodb.dao.*
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
-import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.*
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
 import com.quizappbackend.model.databases.mongodb.documents.user.User
 import com.quizappbackend.utils.Constants

@@ -2,11 +2,11 @@ package com.quizappbackend.utils
 
 import com.quizappbackend.model.databases.Degree
 import com.quizappbackend.model.databases.Degree.*
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoSubject
-import com.quizappbackend.model.databases.mongodb.documents.user.Role.*
+import com.quizappbackend.model.databases.mongodb.documents.MongoCourseOfStudies
+import com.quizappbackend.model.databases.mongodb.documents.MongoFaculty
+import com.quizappbackend.model.databases.mongodb.documents.MongoSubject
 import com.quizappbackend.model.databases.mongodb.documents.user.User
+import com.quizappbackend.model.databases.mongodb.documents.user.Role.*
 import java.io.File
 
 object DataPrefillUtil {
@@ -175,7 +175,6 @@ object DataPrefillUtil {
 
             Pair(faculties, coursesOfStudies)
         }
-
 
 
     val professorList get(): List<User> = run {
@@ -623,9 +622,7 @@ object DataPrefillUtil {
             wirtschaftsinformatikProfs,
             wirtschaftProfs,
             wirtschaftsingenieurwesenProfs,
-        ).flatten().map {
-            it.copy(password = "1234".generateHash())
-        }
+        ).flatten().map { it.copy(password = "1234".generateHash()) }
     }
 
     private fun generateSubjects() {

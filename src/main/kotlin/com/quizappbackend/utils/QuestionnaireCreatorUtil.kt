@@ -2,11 +2,11 @@ package com.quizappbackend.utils
 
 import com.quizappbackend.authentication.JwtAuth.userId
 import com.quizappbackend.authentication.JwtAuth.userName
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoAnswer
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestion
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.MongoCourseOfStudies
+import com.quizappbackend.model.databases.mongodb.documents.MongoFaculty
+import com.quizappbackend.model.databases.mongodb.documents.MongoAnswer
+import com.quizappbackend.model.databases.mongodb.documents.MongoQuestion
+import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
 import com.quizappbackend.mongoRepository
 import io.ktor.auth.jwt.*
@@ -104,7 +104,6 @@ object QuestionnaireCreatorUtil {
 
     //TODO -> Hier gescheite Fragebögen erstellen fürs testen
     suspend fun generateReadableQuestionnaires(principle: JWTPrincipal) = listOf(
-        generateReadableQuestionnaireOne(principle),
         generateInformaticsQuestionnaire(principle),
         generateEconomicsQuestionnaire(principle)
     )
@@ -115,7 +114,7 @@ object QuestionnaireCreatorUtil {
             title = "Beispiel Fragebogen",
             courseOfStudiesIds = listOf("6192411146a8092ef8dcf092"),
             authorInfo = AuthorInfo(principle.userId, principle.userName),
-            subject = "Fach 123",
+            subject = "Beispiel Fach",
             questions = listOf(
                 MongoQuestion(
                     questionText = "Wie viele Fakultäten gibt es an der HFU?",

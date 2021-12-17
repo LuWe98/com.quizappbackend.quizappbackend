@@ -15,7 +15,6 @@ sealed class ApiPaths {
         const val AUTHORS_PAGED = "/authors/paged"
         const val CHANGE_PASSWORD = "/user/changepassword"
         const val USERS_PAGED_ADMIN = "/admin/users/paged"
-        const val GENERATE_RANDOM = "/user/random"
     }
 
     object FacultyPaths : ApiPaths() {

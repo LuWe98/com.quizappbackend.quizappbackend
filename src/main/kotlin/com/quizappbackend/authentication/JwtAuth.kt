@@ -5,8 +5,8 @@ import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.quizappbackend.authentication.UserCredentialsErrorType.CREDENTIALS_CHANGED
 import com.quizappbackend.authentication.UserCredentialsErrorType.USER_DOES_NOT_EXIST
-import com.quizappbackend.model.databases.mongodb.documents.user.Role
 import com.quizappbackend.model.databases.mongodb.documents.user.User
+import com.quizappbackend.model.databases.mongodb.documents.user.Role
 import com.quizappbackend.mongoRepository
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -54,7 +54,7 @@ object JwtAuth {
 
     val JWTCredential.userName: String get() = payload.getClaim(CLAIM_USER_NAME).asString()
 
-    val JWTCredential.userHashedPassword: String get() = payload.getClaim(CLAIM_HASHED_PW).asString()
+    private val JWTCredential.userHashedPassword: String get() = payload.getClaim(CLAIM_HASHED_PW).asString()
 
     val JWTCredential.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
 
@@ -63,8 +63,6 @@ object JwtAuth {
     val JWTPrincipal.userName: String get() = payload.getClaim(CLAIM_USER_NAME).asString()
 
     val JWTPrincipal.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
-
-    val JWTPrincipal.userHashedPassword: String get() = payload.getClaim(CLAIM_HASHED_PW).asString()
 
 
     fun generateToken(user: User): String = generateToken(

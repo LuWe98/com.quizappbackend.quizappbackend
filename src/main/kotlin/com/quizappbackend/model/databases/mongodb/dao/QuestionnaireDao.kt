@@ -1,15 +1,12 @@
 package com.quizappbackend.model.databases.mongodb.dao
 
 import com.mongodb.client.model.BucketOptions
-import com.quizappbackend.model.databases.dto.BrowsableOrderBy
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestion
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
+import com.quizappbackend.model.databases.dto.RemoteQuestionnaireOrderBy
+import com.quizappbackend.model.databases.mongodb.documents.MongoQuestion
+import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
 import com.quizappbackend.model.databases.QuestionnaireVisibility
 import com.quizappbackend.model.databases.dto.MongoBrowsableQuestionnaire
 import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
-import com.quizappbackend.model.databases.mongodb.documents.user.User
-import com.quizappbackend.utils.Constants
-import org.bson.Document
 import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.CoroutineCollection
 
@@ -40,7 +37,7 @@ class QuestionnaireDao(
         facultyIds: List<String>,
         courseOfStudiesIds: List<String>,
         authorIds: List<String>,
-        orderBy: BrowsableOrderBy,
+        orderBy: RemoteQuestionnaireOrderBy,
         ascending: Boolean
     ): List<MongoBrowsableQuestionnaire> {
 

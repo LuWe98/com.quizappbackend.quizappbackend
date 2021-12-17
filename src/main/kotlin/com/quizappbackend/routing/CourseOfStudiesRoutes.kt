@@ -1,8 +1,7 @@
 package com.quizappbackend.routing
 
 import com.quizappbackend.authentication.JwtAuth
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.faculty.MongoFaculty
+import com.quizappbackend.model.databases.mongodb.documents.MongoCourseOfStudies
 import com.quizappbackend.model.networking.requests.DeleteCourseOfStudiesRequest
 import com.quizappbackend.model.networking.requests.InsertCourseOfStudiesRequest
 import com.quizappbackend.model.networking.requests.SyncCoursesOfStudiesRequest
@@ -10,7 +9,6 @@ import com.quizappbackend.model.networking.responses.DeleteCourseOfStudiesRespon
 import com.quizappbackend.model.networking.responses.DeleteCourseOfStudiesResponse.DeleteCourseOfStudiesResponseType
 import com.quizappbackend.model.networking.responses.InsertCourseOfStudiesResponse
 import com.quizappbackend.model.networking.responses.InsertCourseOfStudiesResponse.InsertCourseOfStudiesResponseType
-import com.quizappbackend.model.networking.responses.InsertFacultyResponse
 import com.quizappbackend.mongoRepository
 import com.quizappbackend.routing.ApiPaths.*
 import io.ktor.application.*

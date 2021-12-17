@@ -2,9 +2,8 @@ package com.quizappbackend.model.databases.mongodb.dao
 
 import com.mongodb.client.model.ReplaceOneModel
 import com.mongodb.client.model.ReplaceOptions
-import com.mongodb.client.model.UpdateOneModel
 import com.mongodb.client.model.UpdateOptions
-import com.quizappbackend.model.databases.mongodb.documents.questionnairefilled.MongoFilledQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.MongoFilledQuestionnaire
 import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.CoroutineCollection
 

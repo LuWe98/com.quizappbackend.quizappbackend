@@ -1,6 +1,6 @@
 package com.quizappbackend.model.networking.requests
 
-import com.quizappbackend.model.databases.mongodb.documents.questionnaire.MongoQuestionnaire
+import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
 import kotlinx.serialization.Serializable
 
 @Serializable
