@@ -2,12 +2,8 @@ package com.quizappbackend.utils
 
 import com.quizappbackend.authentication.JwtAuth.userId
 import com.quizappbackend.authentication.JwtAuth.userName
-import com.quizappbackend.model.databases.mongodb.documents.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.MongoFaculty
-import com.quizappbackend.model.databases.mongodb.documents.MongoAnswer
-import com.quizappbackend.model.databases.mongodb.documents.MongoQuestion
-import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
-import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
+import com.quizappbackend.model.mongodb.documents.*
+import com.quizappbackend.model.mongodb.properties.AuthorInfo
 import com.quizappbackend.mongoRepository
 import io.ktor.auth.jwt.*
 import kotlinx.coroutines.Dispatchers.IO

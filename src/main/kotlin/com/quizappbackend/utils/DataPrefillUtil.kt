@@ -1,12 +1,11 @@
 package com.quizappbackend.utils
 
-import com.quizappbackend.model.databases.Degree
-import com.quizappbackend.model.databases.Degree.*
-import com.quizappbackend.model.databases.mongodb.documents.MongoCourseOfStudies
-import com.quizappbackend.model.databases.mongodb.documents.MongoFaculty
-import com.quizappbackend.model.databases.mongodb.documents.MongoSubject
-import com.quizappbackend.model.databases.mongodb.documents.user.User
-import com.quizappbackend.model.databases.mongodb.documents.user.Role.*
+import com.quizappbackend.model.mongodb.properties.Degree.*
+import com.quizappbackend.model.mongodb.documents.MongoCourseOfStudies
+import com.quizappbackend.model.mongodb.documents.MongoFaculty
+import com.quizappbackend.model.mongodb.documents.User
+import com.quizappbackend.model.mongodb.properties.Degree
+import com.quizappbackend.model.mongodb.properties.Role.*
 import java.io.File
 
 object DataPrefillUtil {
@@ -624,91 +623,4 @@ object DataPrefillUtil {
             wirtschaftsingenieurwesenProfs,
         ).flatten().map { it.copy(password = "1234".generateHash()) }
     }
-
-    private fun generateSubjects() {
-        val dmMibSubjects = listOf(
-            MongoSubject(abbreviation = "MIB", name = "Allgemeine Betriebswirtschaftslehre"),
-            MongoSubject(abbreviation = "AudioTech", name = "Audiotechnik"),
-            MongoSubject(abbreviation = "GrdBetr.", name = "Grundlagen der Betriebswirtschaftslehre"),
-            MongoSubject(abbreviation = "GrdUnGr.", name = "Grundlagen der Unternehmensgründung"),
-            MongoSubject(abbreviation = "GrMeGe", name = "Grundlagen Mediengestaltung"),
-            MongoSubject(abbreviation = "MatMedInf", name = "Mathematik in Medien und Informatik"),
-            MongoSubject(abbreviation = "MedPsych", name = "Medienpsychologie"),
-            MongoSubject(abbreviation = "MedTech", name = "Medientechnik"),
-            MongoSubject(abbreviation = "MINT", name = "MINT-Grundlagen"),
-            MongoSubject(abbreviation = "PhMedInf", name = "Physik in Medien und Informatik"),
-            MongoSubject(abbreviation = "Prog", name = "Programmierung"),
-            MongoSubject(abbreviation = "VideoTech", name = "Videotechnik"),
-            MongoSubject(abbreviation = "ComGra", name = "Computergrafik"),
-            MongoSubject(abbreviation = "GIS", name = "Grundlagen Interaktiver Systeme"),
-            MongoSubject(abbreviation = "Marketing", name = "Marketing"),
-            MongoSubject(abbreviation = "MathSimSem", name = "Mathematik und Simulation"),
-            MongoSubject(abbreviation = "Medienökonomie", name = "Medienökonomie"),
-            MongoSubject(abbreviation = "UsExDe", name = "User Experience Design"),
-            MongoSubject(abbreviation = "GrafDV", name = "Grafische Datenverarbeitung"),
-            MongoSubject(abbreviation = "KoSy", name = "Kommunikationssysteme"),
-            MongoSubject(abbreviation = "ProManSoSk", name = "Projektmanagement und Soft Skills"),
-            MongoSubject(abbreviation = "SWDes", name = "Softwaredesign"),
-            MongoSubject(abbreviation = "WiArSchr", name = "Wissenschaftliches Arbeiten und Schreiben"),
-            MongoSubject(abbreviation = "DaVerMe", name = "Datenverarbeitung in der Medienproduktion"),
-            MongoSubject(abbreviation = "DigAvTech", name = "Digitale AV - Technik"),
-            MongoSubject(abbreviation = "verAnw", name = "Verteilte Anwendungen"),
-            MongoSubject(abbreviation = "ProjStud", name = "Projektstudium"),
-            MongoSubject(abbreviation = "ItOnlPm", name = "IT- und Medien-Produktmanagement"),
-            MongoSubject(abbreviation = "ManavMedien", name = "Management von Medienprodukten")
-        )
-
-        val wiIbsSubjects = listOf(
-            MongoSubject(abbreviation = "AppMath", name = "Applied Mathematics"),
-            MongoSubject(abbreviation = "BusMan", name = "Business Management"),
-            MongoSubject(abbreviation = "PrSkCaDev", name = "Professional Skills & Career Development"),
-            MongoSubject(abbreviation = "ProFun", name = "Programming Fundamentals"),
-            MongoSubject(abbreviation = "-", name = "Scientific Working / Academic Writing"),
-            MongoSubject(abbreviation = "-", name = "Systems and Network Architectures"),
-            MongoSubject(abbreviation = "AppSta", name = "Applied Statistics"),
-            MongoSubject(abbreviation = "BusPro", name = "Business Processes"),
-            MongoSubject(abbreviation = "BatBas", name = "Databases"),
-            MongoSubject(abbreviation = "DigMarECo", name = "Digital Marketing and eCommerce"),
-            MongoSubject(abbreviation = "FinAcc", name = "Financial Accounting"),
-            MongoSubject(abbreviation = "ObOrProg", name = "Object-oriented Programming"),
-            MongoSubject(abbreviation = "AppArIn", name = "Applied Artificial Intelligence"),
-            MongoSubject(abbreviation = "OpLog", name = "Operations and Logistics"),
-            MongoSubject(abbreviation = "EnWir", name = "Energiewirtschaft"),
-            MongoSubject(abbreviation = "InnovddWe", name = "Innovationen die die Welt verändern"),
-            MongoSubject(abbreviation = "BPOPMRC", name = "Business Process Optimization - Process Mining"),
-            MongoSubject(abbreviation = "BWL", name = "Computer Security"),
-            MongoSubject(abbreviation = "BWL", name = "ERP-Systems"),
-            MongoSubject(abbreviation = "BWL", name = "Introduction to Internship"),
-            MongoSubject(abbreviation = "BWL", name = "Management Accounting and Controlling"),
-            MongoSubject(abbreviation = "BWL", name = "Project Management"),
-            MongoSubject(abbreviation = "BWL", name = "Web-based Technologies"),
-        )
-
-        val wiWibSubjects = listOf(
-            MongoSubject(abbreviation = "BWL", name = "Betriebswirtschaftslehre"),
-            MongoSubject(abbreviation = "DB", name = "Datenbanken"),
-            MongoSubject(abbreviation = "EinfWInfor", name = "Einführung in die Wirtschaftsinformatik"),
-            MongoSubject(abbreviation = "-", name = "Einführung in Wissenschaftliches Arbeiten"),
-            MongoSubject(abbreviation = "Prog1", name = "Programmieren 1"),
-            MongoSubject(abbreviation = "WIMatheSta", name = "Wirtschaftsmathematik und -statistik"),
-            MongoSubject(abbreviation = "GeProDes", name = "Geschäftsprozessdesign"),
-            MongoSubject(abbreviation = "Prog2", name = "Programmieren 2"),
-            MongoSubject(abbreviation = "RWContr", name = "Rechnungswesen und Controlling"),
-            MongoSubject(abbreviation = "RhPrMoTech", name = "Rhetorik, Präsentations- und Moderationstechnik"),
-            MongoSubject(abbreviation = "SysNwAr", name = "System- und Netzwerkarchitekturen"),
-            MongoSubject(abbreviation = "FoMeDa", name = "Formale Methoden und Datenstrukturen"),
-            MongoSubject(abbreviation = "InStaSW", name = "Integrierte Standard-Software"),
-            MongoSubject(abbreviation = "IntWor", name = "Internetworking"),
-            MongoSubject(abbreviation = "LoSuChMa", name = "Logistik und Supply Chain Management "),
-            MongoSubject(abbreviation = "SWEng", name = "Software - Engineering"),
-            MongoSubject(abbreviation = "BusPro", name = "Business - Projekt"),
-            MongoSubject(abbreviation = "BuIn", name = "Business Intelligence"),
-            MongoSubject(abbreviation = "ITMan", name = "IT-Management"),
-            MongoSubject(abbreviation = "MobSys", name = "Mobile Systeme"),
-            MongoSubject(abbreviation = "VerSys", name = "Verteilte Systeme"),
-            MongoSubject(abbreviation = "VWL", name = "Volkswirtschaftslehre"),
-            MongoSubject(abbreviation = "SW-Project", name = "Software-Projekt")
-        )
-    }
-
 }

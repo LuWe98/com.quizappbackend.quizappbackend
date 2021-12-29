@@ -1,15 +1,13 @@
 package com.quizappbackend.routing
 
 import com.quizappbackend.authentication.JwtAuth
-import com.quizappbackend.model.networking.requests.DeleteFacultyRequest
-import com.quizappbackend.model.networking.requests.InsertFacultyRequest
-import com.quizappbackend.model.networking.requests.SyncFacultiesRequest
-import com.quizappbackend.model.networking.responses.DeleteFacultyResponse
-import com.quizappbackend.model.networking.responses.DeleteFacultyResponse.*
-import com.quizappbackend.model.networking.responses.InsertFacultyResponse
-import com.quizappbackend.model.networking.responses.InsertFacultyResponse.*
+import com.quizappbackend.model.ktor.BackendRequest.*
+import com.quizappbackend.model.ktor.BackendResponse.DeleteFacultyResponse
+import com.quizappbackend.model.ktor.BackendResponse.DeleteFacultyResponse.DeleteFacultyResponseType
+import com.quizappbackend.model.ktor.BackendResponse.InsertFacultyResponse
+import com.quizappbackend.model.ktor.BackendResponse.InsertFacultyResponse.InsertFacultyResponseType
 import com.quizappbackend.mongoRepository
-import com.quizappbackend.routing.ApiPaths.*
+import com.quizappbackend.routing.ApiPaths.FacultyPaths
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*

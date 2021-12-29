@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+
     val kotlinVersion: String by project
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
 
@@ -62,7 +63,6 @@ dependencies {
     val koinVersion: String by project
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
-    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
 
     //Test

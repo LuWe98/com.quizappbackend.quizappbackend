@@ -5,8 +5,8 @@ import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.quizappbackend.authentication.UserCredentialsErrorType.CREDENTIALS_CHANGED
 import com.quizappbackend.authentication.UserCredentialsErrorType.USER_DOES_NOT_EXIST
-import com.quizappbackend.model.databases.mongodb.documents.user.User
-import com.quizappbackend.model.databases.mongodb.documents.user.Role
+import com.quizappbackend.model.mongodb.documents.User
+import com.quizappbackend.model.mongodb.properties.Role
 import com.quizappbackend.mongoRepository
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -134,7 +134,7 @@ object JwtAuth {
 
         challenge { schema, _ ->
             if (call.authentication.allErrors.isEmpty() || call.authentication.allErrors.any { it.message == ERROR_CAUSE_USER_ROLE_CHANGED }) {
-                throw UnauthorizedException(schema, realm)
+                throw UserUnauthorizedException(schema, realm)
             }
 
             if (call.authentication.allErrors.any { it.message == ERROR_CAUSE_USER_CREDENTIALS_CHANGED }) {

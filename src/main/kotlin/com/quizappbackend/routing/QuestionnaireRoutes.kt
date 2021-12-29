@@ -2,17 +2,17 @@ package com.quizappbackend.routing
 
 import com.quizappbackend.authentication.JwtAuth.userId
 import com.quizappbackend.authentication.JwtAuth.userPrinciple
-import com.quizappbackend.model.networking.requests.*
-import com.quizappbackend.model.networking.responses.*
-import com.quizappbackend.model.networking.responses.ChangeQuestionnaireVisibilityResponse.ChangeQuestionnaireVisibilityResponseType
-import com.quizappbackend.model.networking.responses.DeleteQuestionnaireResponse.DeleteQuestionnaireResponseType
-import com.quizappbackend.model.networking.responses.GetQuestionnaireResponse.GetQuestionnaireResponseType
-import com.quizappbackend.model.networking.responses.InsertQuestionnairesResponse.InsertQuestionnairesResponseType
-import com.quizappbackend.model.networking.responses.ShareQuestionnaireWithUserResponse.ShareQuestionnaireWithUserResponseType
-import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
-import com.quizappbackend.model.databases.mongodb.documents.MongoFilledQuestionnaire
+import com.quizappbackend.model.mongodb.documents.MongoFilledQuestionnaire
+import com.quizappbackend.model.ktor.BackendRequest.*
+import com.quizappbackend.model.ktor.BackendResponse.*
+import com.quizappbackend.model.ktor.BackendResponse.ChangeQuestionnaireVisibilityResponse.ChangeQuestionnaireVisibilityResponseType
+import com.quizappbackend.model.ktor.BackendResponse.DeleteQuestionnaireResponse.DeleteQuestionnaireResponseType
+import com.quizappbackend.model.ktor.BackendResponse.GetQuestionnaireResponse.GetQuestionnaireResponseType
+import com.quizappbackend.model.ktor.BackendResponse.InsertQuestionnairesResponse.InsertQuestionnairesResponseType
+import com.quizappbackend.model.ktor.BackendResponse.ShareQuestionnaireWithUserResponse.ShareQuestionnaireWithUserResponseType
+import com.quizappbackend.model.mongodb.documents.MongoQuestionnaire
 import com.quizappbackend.mongoRepository
-import com.quizappbackend.routing.ApiPaths.*
+import com.quizappbackend.routing.ApiPaths.QuestionnairePaths
 import com.quizappbackend.utils.QuestionnaireCreatorUtil
 import io.ktor.application.*
 import io.ktor.auth.*

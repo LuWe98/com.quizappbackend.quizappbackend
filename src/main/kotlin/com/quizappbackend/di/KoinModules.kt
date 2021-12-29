@@ -1,10 +1,9 @@
 package com.quizappbackend.di
 
-import com.quizappbackend.model.databases.mongodb.MongoRepository
-import com.quizappbackend.model.databases.mongodb.dao.*
-import com.quizappbackend.model.databases.mongodb.documents.*
-import com.quizappbackend.model.databases.mongodb.documents.user.AuthorInfo
-import com.quizappbackend.model.databases.mongodb.documents.user.User
+import com.quizappbackend.model.mongodb.MongoRepository
+import com.quizappbackend.model.mongodb.dao.*
+import com.quizappbackend.model.mongodb.documents.*
+import com.quizappbackend.model.mongodb.properties.AuthorInfo
 import com.quizappbackend.utils.Constants
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.runBlocking
@@ -23,8 +22,8 @@ object KoinModules {
             KMongo.createClient().coroutine.getDatabase(Constants.MONGO_DATABASE_NAME)
         }
 
-        single(named(Constants.MONGO_USER_COLLECTION_NAME)) {
-            (get() as CoroutineDatabase).getCollection<User>(Constants.MONGO_USER_COLLECTION_NAME).apply {
+        single(named(Constants.MONGO_USER_COLLECTION_NAME), true) {
+            get<CoroutineDatabase>().getCollection<User>(Constants.MONGO_USER_COLLECTION_NAME).apply {
                 runBlocking(IO) {
                     ensureUniqueIndex(User::userName)
                     ensureIndex(User::role)
@@ -32,9 +31,10 @@ object KoinModules {
             }
         }
 
-        single(named(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME)) {
-            (get() as CoroutineDatabase).getCollection<MongoQuestionnaire>(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME).apply {
+        single(named(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME), true) {
+            get<CoroutineDatabase>().getCollection<MongoQuestionnaire>(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME).apply {
                 runBlocking(IO) {
+                    ensureIndex(MongoQuestionnaire::title)
                     ensureIndex(MongoQuestionnaire::authorInfo / AuthorInfo::userName)
                     ensureIndex(MongoQuestionnaire::authorInfo / AuthorInfo::userId)
                     ensureIndex(MongoQuestionnaire::lastModifiedTimestamp)
@@ -42,16 +42,16 @@ object KoinModules {
             }
         }
 
-        single(named(Constants.MONGO_FILLED_QUESTIONNAIRE_COLLECTION_NAME)) {
-            (get() as CoroutineDatabase).getCollection<MongoFilledQuestionnaire>(Constants.MONGO_FILLED_QUESTIONNAIRE_COLLECTION_NAME).apply {
+        single(named(Constants.MONGO_FILLED_QUESTIONNAIRE_COLLECTION_NAME), true) {
+            get<CoroutineDatabase>().getCollection<MongoFilledQuestionnaire>(Constants.MONGO_FILLED_QUESTIONNAIRE_COLLECTION_NAME).apply {
                 runBlocking(IO) {
                     ensureUniqueIndex(MongoFilledQuestionnaire::questionnaireId, MongoFilledQuestionnaire::userId)
                 }
             }
         }
 
-        single(named(Constants.MONGO_FACULTY_COLLECTION_NAME)) {
-            (get() as CoroutineDatabase).getCollection<MongoFaculty>(Constants.MONGO_FACULTY_COLLECTION_NAME).apply {
+        single(named(Constants.MONGO_FACULTY_COLLECTION_NAME), true) {
+            get<CoroutineDatabase>().getCollection<MongoFaculty>(Constants.MONGO_FACULTY_COLLECTION_NAME).apply {
                 runBlocking(IO) {
                     ensureUniqueIndex(MongoFaculty::name)
                     ensureUniqueIndex(MongoFaculty::abbreviation)
@@ -59,8 +59,8 @@ object KoinModules {
             }
         }
 
-        single(named(Constants.MONGO_COURSE_OF_STUDIES_COLLECTION_NAME)) {
-            (get() as CoroutineDatabase).getCollection<MongoCourseOfStudies>(Constants.MONGO_COURSE_OF_STUDIES_COLLECTION_NAME).apply {
+        single(named(Constants.MONGO_COURSE_OF_STUDIES_COLLECTION_NAME), true) {
+            get<CoroutineDatabase>().getCollection<MongoCourseOfStudies>(Constants.MONGO_COURSE_OF_STUDIES_COLLECTION_NAME).apply {
                 runBlocking(IO) {
                     ensureUniqueIndex(MongoCourseOfStudies::name, MongoCourseOfStudies::abbreviation)
                     ensureIndex(MongoCourseOfStudies::lastModifiedTimestamp)

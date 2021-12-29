@@ -3,8 +3,8 @@ package com.quizappbackend
 import com.quizappbackend.authentication.JwtAuth.registerJwtAdminAuthentication
 import com.quizappbackend.authentication.JwtAuth.registerJwtAuthentication
 import com.quizappbackend.di.KoinModules
-import com.quizappbackend.logging.registerStatusPages
-import com.quizappbackend.model.databases.mongodb.MongoRepository
+import com.quizappbackend.model.mongodb.MongoRepository
+import com.quizappbackend.model.ktor.registerStatusPages
 import com.quizappbackend.routing.*
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -13,13 +13,13 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.netty.*
 import kotlinx.serialization.json.Json
-import org.koin.java.KoinJavaComponent
 import org.koin.ktor.ext.Koin
+import org.koin.ktor.ext.get
 import org.slf4j.event.Level
 
-fun main(args: Array<String>) = EngineMain.main(args)
-
 lateinit var mongoRepository: MongoRepository
+
+fun main(args: Array<String>) = EngineMain.main(args)
 
 @Suppress("unused")
 fun Application.module() {
@@ -32,12 +32,7 @@ fun Application.module() {
 
     install(Koin) {
         modules(KoinModules.SINGLETON_MODULE)
-        mongoRepository = KoinJavaComponent.get(MongoRepository::class.java)
-    }
-
-    install(Authentication) {
-        registerJwtAuthentication()
-        registerJwtAdminAuthentication()
+        mongoRepository = get()
     }
 
     install(ContentNegotiation) {
@@ -49,6 +44,11 @@ fun Application.module() {
 
     install(StatusPages) {
         registerStatusPages()
+    }
+
+    install(Authentication) {
+        registerJwtAuthentication()
+        registerJwtAdminAuthentication()
     }
 
     install(Routing) {

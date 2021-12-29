@@ -1,16 +1,14 @@
 package com.quizappbackend.routing
 
 import com.quizappbackend.authentication.JwtAuth
-import com.quizappbackend.model.databases.mongodb.documents.MongoCourseOfStudies
-import com.quizappbackend.model.networking.requests.DeleteCourseOfStudiesRequest
-import com.quizappbackend.model.networking.requests.InsertCourseOfStudiesRequest
-import com.quizappbackend.model.networking.requests.SyncCoursesOfStudiesRequest
-import com.quizappbackend.model.networking.responses.DeleteCourseOfStudiesResponse
-import com.quizappbackend.model.networking.responses.DeleteCourseOfStudiesResponse.DeleteCourseOfStudiesResponseType
-import com.quizappbackend.model.networking.responses.InsertCourseOfStudiesResponse
-import com.quizappbackend.model.networking.responses.InsertCourseOfStudiesResponse.InsertCourseOfStudiesResponseType
+import com.quizappbackend.model.mongodb.documents.MongoCourseOfStudies
+import com.quizappbackend.model.ktor.BackendRequest.*
+import com.quizappbackend.model.ktor.BackendResponse.DeleteCourseOfStudiesResponse
+import com.quizappbackend.model.ktor.BackendResponse.DeleteCourseOfStudiesResponse.DeleteCourseOfStudiesResponseType
+import com.quizappbackend.model.ktor.BackendResponse.InsertCourseOfStudiesResponse
+import com.quizappbackend.model.ktor.BackendResponse.InsertCourseOfStudiesResponse.InsertCourseOfStudiesResponseType
 import com.quizappbackend.mongoRepository
-import com.quizappbackend.routing.ApiPaths.*
+import com.quizappbackend.routing.ApiPaths.CourseOfStudiesPaths
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*

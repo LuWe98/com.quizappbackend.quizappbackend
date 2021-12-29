@@ -2,17 +2,13 @@ package com.quizappbackend.routing
 
 import com.quizappbackend.authentication.JwtAuth.userId
 import com.quizappbackend.authentication.JwtAuth.userPrinciple
-import com.quizappbackend.model.networking.requests.DeleteFilledQuestionnaireRequest
-import com.quizappbackend.model.networking.requests.InsertFilledQuestionnaireRequest
-import com.quizappbackend.model.networking.requests.InsertFilledQuestionnairesRequest
-import com.quizappbackend.model.networking.responses.DeleteFilledQuestionnaireResponse
-import com.quizappbackend.model.networking.responses.DeleteFilledQuestionnaireResponse.DeleteFilledQuestionnaireResponseType
-import com.quizappbackend.model.networking.responses.InsertFilledQuestionnaireResponse
-import com.quizappbackend.model.networking.responses.InsertFilledQuestionnaireResponse.InsertFilledQuestionnaireResponseType
-import com.quizappbackend.model.networking.responses.InsertFilledQuestionnairesResponse
-import com.quizappbackend.model.networking.responses.InsertFilledQuestionnairesResponse.InsertFilledQuestionnairesResponseType
-import com.quizappbackend.model.databases.mongodb.documents.MongoQuestionnaire
-import com.quizappbackend.model.databases.mongodb.documents.MongoFilledQuestionnaire
+import com.quizappbackend.model.mongodb.documents.MongoFilledQuestionnaire
+import com.quizappbackend.model.ktor.BackendRequest.*
+import com.quizappbackend.model.ktor.BackendResponse.*
+import com.quizappbackend.model.ktor.BackendResponse.DeleteFilledQuestionnaireResponse.*
+import com.quizappbackend.model.ktor.BackendResponse.InsertFilledQuestionnaireResponse.*
+import com.quizappbackend.model.ktor.BackendResponse.InsertFilledQuestionnairesResponse.*
+import com.quizappbackend.model.mongodb.documents.MongoQuestionnaire
 import com.quizappbackend.mongoRepository
 import com.quizappbackend.routing.ApiPaths.*
 import com.quizappbackend.utils.RandomFilledQuestionnaireCreatorUtil
@@ -32,7 +28,7 @@ fun Routing.registerFilledQuestionnaireRoutes() {
 
 
 private fun Route.registerInsertFilledQuestionnaireRoute() = authenticate {
-    post(FilledQuestionnairePaths.INSERT) {
+    post(FilledQuestionnairePaths.INSERT_SINGLE) {
         val request = call.receive<InsertFilledQuestionnaireRequest>()
 
         val questionnaire = mongoRepository.findOneById<MongoQuestionnaire>(request.mongoFilledQuestionnaire.questionnaireId)
@@ -42,7 +38,7 @@ private fun Route.registerInsertFilledQuestionnaireRoute() = authenticate {
                 call.respond(
                     HttpStatusCode.OK,
                     InsertFilledQuestionnaireResponse(
-                        if(wasAcknowledged) InsertFilledQuestionnaireResponseType.QUESTIONNAIRE_DOES_NOT_EXIST_ANYMORE
+                        if (wasAcknowledged) InsertFilledQuestionnaireResponseType.QUESTIONNAIRE_DOES_NOT_EXIST_ANYMORE
                         else InsertFilledQuestionnaireResponseType.NOT_ACKNOWLEDGED
                     )
                 )
@@ -77,7 +73,7 @@ private fun Route.registerInsertFilledQuestionnaireRoute() = authenticate {
 
 
 private fun Route.registerInsertFilledQuestionnairesRoute() = authenticate {
-    post(FilledQuestionnairePaths.INSERTS) {
+    post(FilledQuestionnairePaths.INSERT_MULTIPLE) {
         val request = call.receive<InsertFilledQuestionnairesRequest>()
 
         val questionnaires = mongoRepository.findQuestionnairesWith(request.mongoFilledQuestionnaires)
