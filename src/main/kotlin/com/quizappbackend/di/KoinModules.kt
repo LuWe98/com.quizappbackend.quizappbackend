@@ -4,6 +4,7 @@ import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.mongodb.dao.*
 import com.quizappbackend.model.mongodb.documents.*
 import com.quizappbackend.model.mongodb.properties.AuthorInfo
+import com.quizappbackend.routing.services.*
 import com.quizappbackend.utils.Constants
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.runBlocking
@@ -68,16 +69,27 @@ object KoinModules {
             }
         }
 
-        single { UserDao(get(named(Constants.MONGO_USER_COLLECTION_NAME))) }
+        single<UserDao> { UserDaoImpl(get(named(Constants.MONGO_USER_COLLECTION_NAME))) }
 
-        single { QuestionnaireDao(get(named(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME))) }
+        single<QuestionnaireDao> { QuestionnaireDaoImpl(get(named(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME))) }
 
-        single { FilledQuestionnaireDao(get(named(Constants.MONGO_FILLED_QUESTIONNAIRE_COLLECTION_NAME))) }
+        single<FilledQuestionnaireDao> { FilledQuestionnaireDaoImpl(get(named(Constants.MONGO_FILLED_QUESTIONNAIRE_COLLECTION_NAME))) }
 
-        single { FacultyDao(get(named(Constants.MONGO_FACULTY_COLLECTION_NAME))) }
+        single<FacultyDao> { FacultyDaoImpl(get(named(Constants.MONGO_FACULTY_COLLECTION_NAME))) }
 
-        single { CourseOfStudiesDao(get(named(Constants.MONGO_COURSE_OF_STUDIES_COLLECTION_NAME))) }
+        single<CourseOfStudiesDao> { CourseOfStudiesDaoImpl(get(named(Constants.MONGO_COURSE_OF_STUDIES_COLLECTION_NAME))) }
 
         single { MongoRepository(get(), get(), get(), get(), get()) }
+
+        single<FacultyRouteService> { FacultyRouteServiceImpl(get()) }
+
+        single<CourseOfStudiesRouteService> { CourseOfStudiesRouteServiceImpl(get()) }
+
+        single<UserRouteService> { UserRouteServiceImpl(get()) }
+
+        single<FilledQuestionnaireRouteService> { FilledQuestionnaireRouteServiceImpl(get()) }
+
+        single<QuestionnaireRouteService> { QuestionnaireRouteServiceImpl(get()) }
+
     }
 }

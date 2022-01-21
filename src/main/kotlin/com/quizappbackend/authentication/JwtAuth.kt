@@ -5,9 +5,9 @@ import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.quizappbackend.authentication.UserCredentialsErrorType.CREDENTIALS_CHANGED
 import com.quizappbackend.authentication.UserCredentialsErrorType.USER_DOES_NOT_EXIST
+import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.mongodb.documents.User
 import com.quizappbackend.model.mongodb.properties.Role
-import com.quizappbackend.mongoRepository
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.AuthenticationFailedCause.*
@@ -18,6 +18,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 object JwtAuth {
+
+    const val ADMIN_ROUTE = "adminRoute"
 
     private const val REALM = "QuizAppRealm"
     private const val SUBJECT = "JWTAuthentication"
@@ -33,37 +35,14 @@ object JwtAuth {
     private val ALGORITHM: Algorithm = Algorithm.HMAC512(SECRET)
     private val expirationDate get() = Date(getTimeMillis() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS))
 
-    const val ADMIN_ROUTE = "adminRoute"
-
     private const val CLAIM_USER_ID = "userId"
     private const val CLAIM_USER_NAME = "userName"
     private const val CLAIM_HASHED_PW = "hashedPw"
     private const val CLAIM_USER_ROLE = "userRole"
 
-
     private const val ERROR_CAUSE_USER_CREDENTIALS_CHANGED = "errorCauseUserCredentialsChanged"
     private const val ERROR_CAUSE_USER_DOES_NOT_EXIST = "errorCauseUserDoesNotExists"
     private const val ERROR_CAUSE_USER_ROLE_CHANGED = "errorCauseUserRoleChanged"
-
-
-    private val PipelineContext<*, ApplicationCall>.userPrincipleOptional get() = call.principal<JWTPrincipal>()
-
-    val PipelineContext<*, ApplicationCall>.userPrinciple get() = userPrincipleOptional!!
-
-    val JWTCredential.userId: String get() = payload.getClaim(CLAIM_USER_ID).asString()
-
-    val JWTCredential.userName: String get() = payload.getClaim(CLAIM_USER_NAME).asString()
-
-    private val JWTCredential.userHashedPassword: String get() = payload.getClaim(CLAIM_HASHED_PW).asString()
-
-    val JWTCredential.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
-
-    val JWTPrincipal.userId: String get() = payload.getClaim(CLAIM_USER_ID).asString()
-
-    val JWTPrincipal.userName: String get() = payload.getClaim(CLAIM_USER_NAME).asString()
-
-    val JWTPrincipal.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
-
 
     fun generateToken(user: User): String = generateToken(
         user.id,
@@ -88,22 +67,37 @@ object JwtAuth {
         .withExpiresAt(expirationDate)
         .sign(ALGORITHM)
 
-
     private val jwtVerifier: JWTVerifier = JWT
         .require(ALGORITHM)
         .withIssuer(ISSUER)
         .build()
 
 
-    fun Authentication.Configuration.registerJwtAuthentication() = jwt {
-        initAuthentication()
+    private val PipelineContext<*, ApplicationCall>.userPrincipleOptional get() = call.principal<JWTPrincipal>()
+
+    val PipelineContext<*, ApplicationCall>.userPrinciple get() = userPrincipleOptional!!
+
+    val JWTCredential.userId: String get() = payload.getClaim(CLAIM_USER_ID).asString()
+
+    val JWTCredential.userName: String get() = payload.getClaim(CLAIM_USER_NAME).asString()
+
+    private val JWTCredential.userHashedPassword: String get() = payload.getClaim(CLAIM_HASHED_PW).asString()
+
+    val JWTCredential.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
+
+    val JWTPrincipal.userId: String get() = payload.getClaim(CLAIM_USER_ID).asString()
+
+    val JWTPrincipal.userName: String get() = payload.getClaim(CLAIM_USER_NAME).asString()
+
+    val JWTPrincipal.userRole: Role get() = Role.valueOf(payload.getClaim(CLAIM_USER_ROLE).asString())
+
+
+    fun Authentication.Configuration.initJwtAuthentication(mongoRepository: MongoRepository) {
+        jwt(ADMIN_ROUTE) { initAuthentication(mongoRepository, true) }
+        jwt { initAuthentication(mongoRepository) }
     }
 
-    fun Authentication.Configuration.registerJwtAdminAuthentication() = jwt(ADMIN_ROUTE) {
-        initAuthentication(true)
-    }
-
-    private fun JWTAuthenticationProvider.Configuration.initAuthentication(adminAuthentication: Boolean = false) {
+    private fun JWTAuthenticationProvider.Configuration.initAuthentication(mongoRepository: MongoRepository, adminAuthentication: Boolean = false) {
         realm = REALM
         verifier(jwtVerifier)
 

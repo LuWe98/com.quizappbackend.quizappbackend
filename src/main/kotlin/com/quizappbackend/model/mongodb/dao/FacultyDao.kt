@@ -1,52 +1,18 @@
 package com.quizappbackend.model.mongodb.dao
 
-import com.quizappbackend.model.mongodb.dto.FacultyIdWithTimeStamp
 import com.quizappbackend.model.mongodb.documents.MongoFaculty
-import com.quizappbackend.model.ktor.BackendResponse.*
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
-import org.litote.kmongo.*
-import org.litote.kmongo.coroutine.CoroutineCollection
+import com.quizappbackend.model.mongodb.dto.FacultyIdWithTimeStamp
 
-class FacultyDao(override var collection: CoroutineCollection<MongoFaculty>) : BaseDao<MongoFaculty>(collection) {
+interface FacultyDao: BaseDao<MongoFaculty>  {
 
-    suspend fun isFacultyAbbreviationAlreadyUsed(faculty: MongoFaculty) =
-        collection.findOne(and(MongoFaculty::abbreviation eq faculty.abbreviation, MongoFaculty::id ne faculty.id)) != null
+    suspend fun isFacultyAbbreviationAlreadyUsed(faculty: MongoFaculty) : Boolean
 
-    suspend fun isFacultyNameAlreadyUsed(faculty: MongoFaculty) =
-        collection.findOne(and(MongoFaculty::name eq faculty.name, MongoFaculty::id ne faculty.id)) != null
+    suspend fun isFacultyNameAlreadyUsed(faculty: MongoFaculty) : Boolean
 
-    suspend fun findFacultyWithAbbreviation(abbreviation: String) = collection.findOne(MongoFaculty::abbreviation eq abbreviation)
+    suspend fun findFacultyByAbbreviation(abbreviation: String) : MongoFaculty?
 
-    suspend fun generateSyncFacultiesResponse(facultyIdWithTimeStamp: List<FacultyIdWithTimeStamp>): SyncFacultiesResponse = withContext(IO) {
-        val localFacultyIds = facultyIdWithTimeStamp.map(FacultyIdWithTimeStamp::facultyId)
+    suspend fun findFacultiesToDeleteLocally(localFacultyIdsWithTimestamp: List<FacultyIdWithTimeStamp>): List<String>
 
-        val facultiesToDownLoadAsync = async {
-            collection.find(or(buildFilter(facultyIdWithTimeStamp), MongoFaculty::id nin localFacultyIds)).toList()
-        }
+    suspend fun findFacultiesNotUpToDateOfUser(localFacultyIdsWithTimestamp: List<FacultyIdWithTimeStamp>): List<MongoFaculty>
 
-        val facultiesIdsToDeleteAsync = async {
-            collection.find(MongoFaculty::id `in` localFacultyIds).toList().let { allFaculties ->
-                localFacultyIds.filter { id -> allFaculties.none { it.id == id } }
-            }
-        }
-
-        val facultiesToUpdate: List<MongoFaculty>
-        val facultiesToInsert: List<MongoFaculty>
-
-        facultiesToDownLoadAsync.await().let {
-            facultiesToUpdate = it.filter { faculty -> localFacultyIds.any { id -> faculty.id == id } }
-            facultiesToInsert = it - facultiesToUpdate.toSet()
-        }
-
-        SyncFacultiesResponse(
-            facultiesToInsert = facultiesToInsert,
-            facultiesToUpdate = facultiesToUpdate,
-            facultyIdsToDelete = facultiesIdsToDeleteAsync.await()
-        )
-    }
-
-    private fun buildFilter(facultyIdWithTimeStamp: List<FacultyIdWithTimeStamp>) =
-        or(facultyIdWithTimeStamp.map { and(MongoFaculty::id eq it.facultyId, MongoFaculty::lastModifiedTimestamp ne it.lastModifiedTimestamp) })
 }

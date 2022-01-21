@@ -1,32 +1,21 @@
 package com.quizappbackend.model.mongodb.dao
 
-import com.mongodb.client.model.BucketOptions
-import com.quizappbackend.model.mongodb.dto.RemoteQuestionnaireOrderBy
-import com.quizappbackend.model.mongodb.documents.MongoQuestion
 import com.quizappbackend.model.mongodb.documents.MongoQuestionnaire
-import com.quizappbackend.model.mongodb.properties.QuestionnaireVisibility
 import com.quizappbackend.model.mongodb.dto.MongoBrowsableQuestionnaire
-import com.quizappbackend.model.mongodb.properties.AuthorInfo
-import org.litote.kmongo.*
-import org.litote.kmongo.coroutine.CoroutineCollection
+import com.quizappbackend.model.mongodb.dto.RemoteQuestionnaireOrderBy
+import com.quizappbackend.model.mongodb.properties.QuestionnaireVisibility
 
-class QuestionnaireDao(
-    override var collection: CoroutineCollection<MongoQuestionnaire>
-) : BaseDao<MongoQuestionnaire>(collection) {
+interface QuestionnaireDao: BaseDao<MongoQuestionnaire> {
 
-    suspend fun getXAmountOfQuestionnaires(limit: Int) = collection.find().limit(limit).toList()
+    suspend fun updateQuestionnaireVisibility(questionnaireId: String, newVisibility: QuestionnaireVisibility) : Boolean
 
-    suspend fun changeQuestionnaireVisibility(questionnaireId: String, newVisibility: QuestionnaireVisibility) =
-        collection.updateOne(
-            MongoQuestionnaire::id eq questionnaireId,
-            set(MongoQuestionnaire::visibility setTo newVisibility)
-        ).wasAcknowledged()
+    suspend fun updateAuthorNameOfQuestionnaires(userId: String, newUserName: String) : Boolean
 
-    suspend fun updateAuthorNameInQuestionnaires(userId: String, newUserName: String) =
-        collection.updateMany(
-            MongoQuestionnaire::authorInfo / AuthorInfo::userId eq userId,
-            setValue(MongoQuestionnaire::authorInfo / AuthorInfo::userName, newUserName)
-        ).wasAcknowledged()
+    suspend fun getAllQuestionnairesConnectedToUser(
+        userId: String,
+        questionnairesToIgnore: List<String>,
+        questionnairesToFind: List<String>
+    ) : List<MongoQuestionnaire>
 
     suspend fun getQuestionnairesPaged(
         userId: String,
@@ -39,76 +28,12 @@ class QuestionnaireDao(
         authorIds: List<String>,
         orderBy: RemoteQuestionnaireOrderBy,
         ascending: Boolean
-    ): List<MongoBrowsableQuestionnaire> {
+    ): List<MongoBrowsableQuestionnaire>
 
-        val bsonFilters = mutableListOf(
-            MongoQuestionnaire::visibility eq QuestionnaireVisibility.PUBLIC,
-            MongoQuestionnaire::title regex searchQuery,
-            MongoQuestionnaire::id nin questionnaireIdsToIgnore,
-            MongoQuestionnaire::authorInfo / AuthorInfo::userId ne userId
-        )
+    suspend fun getXAmountOfQuestionnaires(limit: Int) : List<MongoQuestionnaire>
 
-        if (facultyIds.isNotEmpty()) {
-            bsonFilters.add(MongoQuestionnaire::facultyIds `in` facultyIds)
-        }
+    suspend fun removeFacultyFromQuestionnaire(facultyId: String) : Boolean
 
-        if (courseOfStudiesIds.isNotEmpty()) {
-            bsonFilters.add(MongoQuestionnaire::courseOfStudiesIds `in` courseOfStudiesIds)
-        }
-
-        if (authorIds.isNotEmpty()) {
-            bsonFilters.add(MongoQuestionnaire::authorInfo / AuthorInfo::userId `in` authorIds)
-        }
-
-        return collection
-            .find(and(bsonFilters))
-            .sort(orderBy(orderBy.orderByProperty, ascending = ascending))
-            .skip(kotlin.math.max((page - 1) * limit, 0))
-            .projection(fields(exclude(MongoQuestionnaire::questions / MongoQuestion::answers)))
-            .limit(limit)
-            .toList()
-            .map(MongoQuestionnaire::asMongoQuestionnaireBrowse)
-    }
-    //.withDocumentClass<MongoBrowsableQuestionnaire>()
-    //.map(MongoQuestionnaire::asMongoQuestionnaireBrowse)
-
-    //TODO -> Mit Bucket statt Skip Limit?
-    suspend fun getQuestionnairesPagedBucket(userId: String, limit: Int, page: Int, searchQuery: String): List<MongoQuestionnaire> {
-        val group = group(MongoQuestionnaire::id)
-        val bucket = bucket(group, mutableListOf(0, limit), BucketOptions())
-        return collection.aggregate<MongoQuestionnaire>(listOf(bucket)).toList()
-    }
-
-
-//    suspend fun insertSharedUserDataToList(questionnaireId: String, sharedWithUser: SharedWithInfo){
-//        collection.updateOne(MongoQuestionnaire::id eq questionnaireId, addToSet(MongoQuestionnaire::sharedWithInfos, SharedWithInfo(userId, canEdit)))
-//        collection.updateOne(MongoQuestionnaire::id eq questionnaireId, (MongoQuestionnaire::sharedWithInfos, sharedWithUser))
-//    }
-
-
-    suspend fun getAllQuestionnairesConnectedToUser(
-        userId: String,
-        questionnairesToIgnore: List<String>,
-        questionnairesToFind: List<String>
-    ) = collection.find(
-        and(
-            or(
-                MongoQuestionnaire::authorInfo / AuthorInfo::userId eq userId,
-                MongoQuestionnaire::id `in` questionnairesToFind
-            ),
-            MongoQuestionnaire::id nin questionnairesToIgnore
-        )
-    ).toList()
-
-    //MongoQuestionnaire::sharedWithInfos elemMatch (SharedWithInfo::userId eq userId)
-
-    /*
-        suspend fun deleteAnswerWith(questionnaireID: String, answerID: String) = collection.updateOne(
-        MongoQuestionnaire::id eq questionnaireID,
-        pullByFilter(MongoQuestionnaire::questions.allPosOp / MongoQuestion::answers, MongoAnswer::id eq answerID)
-    ).wasAcknowledged()
-     */
-
-
+    suspend fun removeCourseOfStudiesFromQuestionnaire(courseOfStudiesId: String): Boolean
 
 }

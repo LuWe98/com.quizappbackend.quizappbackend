@@ -1,11 +1,9 @@
 package com.quizappbackend
 
-import com.quizappbackend.authentication.JwtAuth.registerJwtAdminAuthentication
-import com.quizappbackend.authentication.JwtAuth.registerJwtAuthentication
+import com.quizappbackend.authentication.JwtAuth.initJwtAuthentication
 import com.quizappbackend.di.KoinModules
-import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.ktor.registerStatusPages
-import com.quizappbackend.routing.*
+import com.quizappbackend.routing.initRoutes
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -14,10 +12,8 @@ import io.ktor.serialization.*
 import io.ktor.server.netty.*
 import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.Koin
-import org.koin.ktor.ext.get
+import org.koin.ktor.ext.getKoin
 import org.slf4j.event.Level
-
-lateinit var mongoRepository: MongoRepository
 
 fun main(args: Array<String>) = EngineMain.main(args)
 
@@ -32,7 +28,6 @@ fun Application.module() {
 
     install(Koin) {
         modules(KoinModules.SINGLETON_MODULE)
-        mongoRepository = get()
     }
 
     install(ContentNegotiation) {
@@ -47,15 +42,14 @@ fun Application.module() {
     }
 
     install(Authentication) {
-        registerJwtAuthentication()
-        registerJwtAdminAuthentication()
+        initJwtAuthentication(getKoin().get())
     }
 
-    install(Routing) {
-        registerUserRoutes()
-        registerQuestionnaireRoutes()
-        registerFilledQuestionnaireRoutes()
-        registerFacultyRoutes()
-        registerCourseOfStudiesRoutes()
-    }
+    install(Routing).initRoutes(
+        facultyRouteService = getKoin().get(),
+        courseOfStudiesRouteService = getKoin().get(),
+        userRouteService = getKoin().get(),
+        filledQuestionnaireRouteService = getKoin().get(),
+        questionnaireRouteService = getKoin().get()
+    )
 }

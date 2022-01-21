@@ -1,6 +1,5 @@
 package com.quizappbackend.model.mongodb.documents
 
-import com.quizappbackend.model.mongodb.documents.DocumentMarker
 import com.quizappbackend.model.mongodb.properties.AuthorInfo
 import com.quizappbackend.model.mongodb.properties.Role
 import io.ktor.util.date.*

@@ -2,9 +2,10 @@ package com.quizappbackend.utils
 
 import com.quizappbackend.authentication.JwtAuth.userId
 import com.quizappbackend.authentication.JwtAuth.userName
+import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.mongodb.documents.*
 import com.quizappbackend.model.mongodb.properties.AuthorInfo
-import com.quizappbackend.mongoRepository
+import com.quizappbackend.model.mongodb.properties.QuestionnaireVisibility
 import io.ktor.auth.jwt.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -14,6 +15,7 @@ import kotlin.random.Random
 object QuestionnaireCreatorUtil {
 
     suspend fun generateRandomData(
+        mongoRepository: MongoRepository,
         principle: JWTPrincipal,
         questionnaireAmount: Int,
         minQuestionsPerQuestionnaire: Int,
@@ -40,6 +42,7 @@ object QuestionnaireCreatorUtil {
                 facultyIds = listOf(randomFaculty.id),
                 courseOfStudiesIds = listOf(randomCourseOfStudies.id),
                 subject = "IW",
+                visibility = QuestionnaireVisibility.PUBLIC,
                 questions = generateQuestions(
                     minQuestionsPerQuestionnaire,
                     maxQuestionsPerQuestionnaire,
@@ -98,10 +101,30 @@ object QuestionnaireCreatorUtil {
     }
 
 
+    fun generateRandomFilledQuestionnaires(
+        userId: String,
+        mongoQuestionnaires: List<MongoQuestionnaire>,
+    ): List<MongoFilledQuestionnaire> {
+        return mongoQuestionnaires.map {
+            MongoFilledQuestionnaire(
+                questionnaireId = it.id,
+                userId = userId,
+                questions = it.questions.map { question ->
+                    val filledAnswers = question.answers.filter { Random.nextBoolean() }.map { answer -> answer.id }
+                    MongoFilledQuestion(questionId = question.id, selectedAnswerIds = filledAnswers)
+                }
+            )
+        }.toList()
+    }
+
+
     //TODO -> Hier gescheite Fragebögen erstellen fürs testen
-    suspend fun generateReadableQuestionnaires(principle: JWTPrincipal) = listOf(
-        generateInformaticsQuestionnaire(principle),
-        generateEconomicsQuestionnaire(principle)
+    suspend fun generateReadableQuestionnaires(
+        mongoRepository: MongoRepository,
+        principle: JWTPrincipal
+    ) = listOf(
+        generateInformaticsQuestionnaire(mongoRepository, principle),
+        generateEconomicsQuestionnaire(mongoRepository, principle)
     )
 
     private fun generateReadableQuestionnaireOne(principle: JWTPrincipal): MongoQuestionnaire {
@@ -194,8 +217,11 @@ object QuestionnaireCreatorUtil {
         )
     }
 
-    private suspend fun generateInformaticsQuestionnaire(principle: JWTPrincipal): MongoQuestionnaire {
-        val faculty = mongoRepository.findFacultyWithAbbreviation("IN")!!
+    private suspend fun generateInformaticsQuestionnaire(
+        mongoRepository: MongoRepository,
+        principle: JWTPrincipal
+    ): MongoQuestionnaire {
+        val faculty = mongoRepository.findFacultyByAbbreviation("IN")!!
 
         return MongoQuestionnaire(
             title = "Informatics Questionnaire",
@@ -316,12 +342,15 @@ object QuestionnaireCreatorUtil {
                 )
             ),
             facultyIds = listOf(faculty.id),
-            courseOfStudiesIds = listOf(mongoRepository.getCourseOfStudiesForFaculty(faculty.id).random().id)
+            courseOfStudiesIds = listOf(mongoRepository.findCourseOfStudiesByFacultyId(faculty.id).random().id)
         )
     }
 
-    private suspend fun generateEconomicsQuestionnaire(principle: JWTPrincipal): MongoQuestionnaire {
-        val faculty = mongoRepository.findFacultyWithAbbreviation("W")!!
+    private suspend fun generateEconomicsQuestionnaire(
+        mongoRepository: MongoRepository,
+        principle: JWTPrincipal
+    ): MongoQuestionnaire {
+        val faculty = mongoRepository.findFacultyByAbbreviation("W")!!
 
         return MongoQuestionnaire(
             title = "Economics Questionnaire",
@@ -396,7 +425,7 @@ object QuestionnaireCreatorUtil {
                 )
             ),
             facultyIds = listOf(faculty.id),
-            courseOfStudiesIds = listOf(mongoRepository.getCourseOfStudiesForFaculty(faculty.id).random().id)
+            courseOfStudiesIds = listOf(mongoRepository.findCourseOfStudiesByFacultyId(faculty.id).random().id)
         )
     }
 }
