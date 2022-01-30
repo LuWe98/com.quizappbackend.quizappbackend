@@ -1,5 +1,6 @@
 package com.quizappbackend.model.ktor
 
+import com.quizappbackend.model.ktor.paging.BrowsableQuestionnairePageKeys
 import com.quizappbackend.model.mongodb.properties.QuestionnaireVisibility
 import com.quizappbackend.model.mongodb.dto.*
 import com.quizappbackend.model.mongodb.documents.MongoCourseOfStudies
@@ -90,10 +91,22 @@ sealed class BackendRequest {
         val facultyIds: List<String>,
         val courseOfStudiesIds: List<String>,
         val authorIds: List<String>,
-        val remoteQuestionnaireOrderBy: RemoteQuestionnaireOrderBy,
+        val orderBy: BrowsableQuestionnaireOrderBy,
         val ascending: Boolean
     ): BackendRequest()
 
+    @Serializable
+    data class GetPagedQuestionnairesWithPageKeysRequest(
+        val lastPageKeys: BrowsableQuestionnairePageKeys,
+        val limit: Int,
+        val searchString: String,
+        val questionnaireIdsToIgnore: List<String>,
+        val facultyIds: List<String>,
+        val courseOfStudiesIds: List<String>,
+        val authorIds: List<String>,
+        val orderBy: BrowsableQuestionnaireOrderBy,
+        val ascending: Boolean
+    ): BackendRequest()
 
     @Serializable
     data class GetQuestionnaireRequest(

@@ -1,16 +1,13 @@
 package com.quizappbackend.model.mongodb
 
+import com.quizappbackend.model.ktor.BackendRequest
 import com.quizappbackend.model.mongodb.dao.*
 import com.quizappbackend.model.mongodb.documents.*
-import com.quizappbackend.model.mongodb.dto.CourseOfStudiesIdWithTimeStamp
-import com.quizappbackend.model.mongodb.dto.FacultyIdWithTimeStamp
-import com.quizappbackend.model.mongodb.dto.ManageUsersOrderBy
-import com.quizappbackend.model.mongodb.dto.RemoteQuestionnaireOrderBy
+import com.quizappbackend.model.mongodb.dto.*
 import com.quizappbackend.model.mongodb.properties.AuthorInfo
 import com.quizappbackend.model.mongodb.properties.QuestionnaireVisibility
 import com.quizappbackend.model.mongodb.properties.Role
 import com.quizappbackend.utils.DataPrefillUtil
-import io.ktor.util.date.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -87,9 +84,6 @@ class MongoRepository(
     } as BaseDao<T>)
 
 
-
-
-
     //USER QUERIES
     suspend fun checkIfUserExistsWithName(userName: String) = userDao.findUserByName(userName) != null
 
@@ -125,9 +119,9 @@ class MongoRepository(
     )
 
 
-
-
     //QUESTIONNAIRE QUERIES
+    suspend fun doesQuestionnaireExist(questionnaireId: String) = findOneById<MongoQuestionnaire>(questionnaireId) != null
+
     suspend fun findQuestionnairesWith(filledQuestionnaires: List<MongoFilledQuestionnaire>) =
         findManyByIds(filledQuestionnaires.map(MongoFilledQuestionnaire::questionnaireId), MongoQuestionnaire::id)
 
@@ -147,26 +141,26 @@ class MongoRepository(
 
     suspend fun getQuestionnairesPaged(
         userId: String,
-        limit: Int,
-        page: Int,
-        searchQuery: String,
-        questionnaireIdsToIgnore: List<String>,
-        facultyIds: List<String>,
-        courseOfStudiesIds: List<String>,
-        authorIds: List<String>,
-        orderBy: RemoteQuestionnaireOrderBy,
-        ascending: Boolean
+        request: BackendRequest.GetPagedQuestionnairesRequest
     ) = questionnaireDao.getQuestionnairesPaged(
         userId = userId,
-        limit = limit,
-        page = page,
-        searchQuery = searchQuery,
-        questionnaireIdsToIgnore = questionnaireIdsToIgnore,
-        facultyIds = facultyIds,
-        courseOfStudiesIds = courseOfStudiesIds,
-        authorIds = authorIds,
-        orderBy = orderBy,
-        ascending = ascending
+        request = request
+    )
+
+    suspend fun getQuestionnairesPagedWithPageKeys(
+        userId: String,
+        request: BackendRequest.GetPagedQuestionnairesWithPageKeysRequest
+    )= questionnaireDao.getQuestionnairesPagedWithPageKeys(
+        userId = userId,
+        request = request
+    )
+
+    suspend fun getPreviousPageKeys(
+        userId: String,
+        request: BackendRequest.GetPagedQuestionnairesWithPageKeysRequest
+    )= questionnaireDao.getPreviousPageKeys(
+        userId = userId,
+        request = request
     )
 
 
@@ -189,7 +183,6 @@ class MongoRepository(
 
     suspend fun findFilledQuestionnairesForUser(userId: String, questionnairesToIgnore: List<String>) =
         filledQuestionnaireDao.findFilledQuestionnairesForUser(userId, questionnairesToIgnore)
-
 
 
     //FACULTY
@@ -218,7 +211,6 @@ class MongoRepository(
     }
 
 
-
     //COURSE OF STUDIES
     suspend fun findCourseOfStudiesIdsToDeleteLocally(localCourseOfStudiesIdsWithTimeStamp: List<CourseOfStudiesIdWithTimeStamp>) =
         courseOfStudiesDao.findCourseOfStudiesToDeleteLocally(localCourseOfStudiesIdsWithTimeStamp)
@@ -232,15 +224,13 @@ class MongoRepository(
 
     suspend fun findCourseOfStudiesByFacultyId(facultyId: String) = courseOfStudiesDao.findCourseOfStudiesByFacultyId(facultyId)
 
-    suspend fun deleteCourseOfStudiesById(courseOfStudiesId: String) : Boolean {
+    suspend fun deleteCourseOfStudiesById(courseOfStudiesId: String): Boolean {
         return deleteOneById<MongoCourseOfStudies>(courseOfStudiesId).also { wasAcknowledged ->
-            if(wasAcknowledged) {
+            if (wasAcknowledged) {
                 questionnaireDao.removeCourseOfStudiesFromQuestionnaire(courseOfStudiesId)
             }
         }
     }
-
-
 
 
 //    suspend fun findUnconnectedQuestionnaires(): List<Any> {

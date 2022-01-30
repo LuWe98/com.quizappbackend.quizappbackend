@@ -5,7 +5,6 @@ import com.quizappbackend.model.ktor.BackendRequest.*
 import com.quizappbackend.model.ktor.BackendResponse.*
 import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.mongodb.documents.MongoFilledQuestionnaire
-import com.quizappbackend.model.mongodb.documents.MongoQuestionnaire
 import com.quizappbackend.utils.QuestionnaireCreatorUtil
 import io.ktor.auth.jwt.*
 
@@ -14,7 +13,8 @@ class FilledQuestionnaireRouteServiceImpl(
 ) : FilledQuestionnaireRouteService {
 
     override suspend fun handleInsertRequest(principle: JWTPrincipal, request: InsertFilledQuestionnaireRequest): InsertFilledQuestionnaireResponse {
-        mongoRepository.findOneById<MongoQuestionnaire>(request.mongoFilledQuestionnaire.questionnaireId)?.let {
+
+        if(!mongoRepository.doesQuestionnaireExist(request.mongoFilledQuestionnaire.questionnaireId)) {
             mongoRepository.deleteManyById(request.mongoFilledQuestionnaire.questionnaireId, MongoFilledQuestionnaire::questionnaireId).let { wasAcknowledged ->
                 return InsertFilledQuestionnaireResponse(
                     if (wasAcknowledged) InsertFilledQuestionnaireResponse.InsertFilledQuestionnaireResponseType.QUESTIONNAIRE_DOES_NOT_EXIST_ANYMORE
@@ -26,7 +26,7 @@ class FilledQuestionnaireRouteServiceImpl(
         if (request.shouldBeIgnoredWhenAnotherIsPresent) {
             mongoRepository.insertFilledQuestionnaireIfNotPresent(principle.userId, request.mongoFilledQuestionnaire).let { acknowledged ->
                 return InsertFilledQuestionnaireResponse(
-                    if (acknowledged) InsertFilledQuestionnaireResponse.InsertFilledQuestionnaireResponseType.EMPTY_INSERTION_SKIPPED
+                    if (acknowledged) InsertFilledQuestionnaireResponse.InsertFilledQuestionnaireResponseType.SUCCESSFUL
                     else InsertFilledQuestionnaireResponse.InsertFilledQuestionnaireResponseType.NOT_ACKNOWLEDGED
                 )
 

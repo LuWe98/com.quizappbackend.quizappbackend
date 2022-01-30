@@ -159,8 +159,13 @@ private fun Routing.questionnaireRouting(service: QuestionnaireRouteService) = Q
         }
 
         post(PAGED) {
-            call.respond(service.handleGetPagesQuestionnairesRequest(userPrinciple, call.receive()))
+            call.respond(service.handleGetPagedQuestionnairesWithPageKeysRequest(userPrinciple, call.receive()))
         }
+
+
+//        post(PAGED) {
+//            call.respond(service.handleGetPagedQuestionnairesRequest(userPrinciple, call.receive()))
+//        }
 
         post(DOWNLOAD) {
             call.respond(service.handleDownloadQuestionnaireRequest(userPrinciple, call.receive()))

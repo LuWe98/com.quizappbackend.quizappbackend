@@ -6,7 +6,6 @@ import com.quizappbackend.model.ktor.BackendResponse.*
 import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.mongodb.documents.MongoFilledQuestionnaire
 import com.quizappbackend.model.mongodb.documents.MongoQuestionnaire
-import com.quizappbackend.model.mongodb.dto.MongoBrowsableQuestionnaire
 import com.quizappbackend.model.mongodb.dto.QuestionnaireIdWithTimestamp
 import com.quizappbackend.utils.QuestionnaireCreatorUtil
 import io.ktor.auth.jwt.*
@@ -83,18 +82,27 @@ class QuestionnaireRouteServiceImpl(
     }
 
 
-    override suspend fun handleGetPagesQuestionnairesRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesRequest): List<MongoBrowsableQuestionnaire> {
-        return mongoRepository.getQuestionnairesPaged(
-            userId = principle.userId,
-            limit = request.limit,
-            page = request.page,
-            searchQuery = request.searchString,
-            questionnaireIdsToIgnore = request.questionnaireIdsToIgnore,
-            facultyIds = request.facultyIds,
-            courseOfStudiesIds = request.courseOfStudiesIds,
-            authorIds = request.authorIds,
-            orderBy = request.remoteQuestionnaireOrderBy,
-            ascending = request.ascending
+    override suspend fun handleGetPagedQuestionnairesRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesRequest) = mongoRepository.getQuestionnairesPaged(
+        userId = principle.userId,
+        request = request
+    )
+
+    override suspend fun handleGetPagedQuestionnairesWithPageKeysRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesWithPageKeysRequest) = withContext(IO) {
+        val asyncPage = async {
+            mongoRepository.getQuestionnairesPagedWithPageKeys(
+                userId = principle.userId,
+                request = request
+            )
+        }
+        val asyncLastKey = async {
+            mongoRepository.getPreviousPageKeys(
+                userId = principle.userId,
+                request = request
+            )
+        }
+        return@withContext GetPagedQuestionnairesWithPageKeysResponse(
+            previousKeys = asyncLastKey.await(),
+            questionnaires = asyncPage.await()
         )
     }
 
@@ -159,7 +167,6 @@ class QuestionnaireRouteServiceImpl(
 
         return mongoRepository.insertMany(questionnaireList)
     }
-
 
 
     //OLD SHARE

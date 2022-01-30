@@ -13,7 +13,13 @@ interface QuestionnaireRouteService {
 
     suspend fun handleDeleteRequest(request: DeleteQuestionnaireRequest): DeleteQuestionnaireResponse
 
-    suspend fun handleGetPagesQuestionnairesRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesRequest): List<MongoBrowsableQuestionnaire>
+    suspend fun handleGetPagedQuestionnairesRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesRequest): List<MongoBrowsableQuestionnaire>
+
+
+
+    suspend fun handleGetPagedQuestionnairesWithPageKeysRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesWithPageKeysRequest): GetPagedQuestionnairesWithPageKeysResponse
+
+
 
     suspend fun handleDownloadQuestionnaireRequest(principle: JWTPrincipal, request: GetQuestionnaireRequest): GetQuestionnaireResponse
 

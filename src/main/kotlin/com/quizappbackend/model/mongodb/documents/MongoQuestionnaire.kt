@@ -6,7 +6,6 @@ import com.quizappbackend.model.mongodb.properties.AuthorInfo
 import io.ktor.util.date.*
 import kotlinx.serialization.Serializable
 import org.bson.codecs.pojo.annotations.BsonId
-import org.bson.codecs.pojo.annotations.BsonIgnore
 import org.bson.types.ObjectId
 
 //TODO -> Idee ist Fakultäten hier rauszunehmen und nur noch die Liste von CoursesOfStudies da zu haben.
@@ -24,10 +23,12 @@ data class MongoQuestionnaire(
     val facultyIds: List<String> = emptyList(),
     val courseOfStudiesIds: List<String> = emptyList(),
     val subject: String,
+    val questionCount: Int,
     val questions: List<MongoQuestion> = emptyList(),
     val visibility: QuestionnaireVisibility = QuestionnaireVisibility.PRIVATE,
     val lastModifiedTimestamp: Long = getTimeMillis()
 ) : DocumentMarker {
+
     fun asMongoQuestionnaireBrowse() = MongoBrowsableQuestionnaire(
         id = id,
         title = title,
@@ -35,7 +36,8 @@ data class MongoQuestionnaire(
         facultyIds = facultyIds,
         courseOfStudiesIds = courseOfStudiesIds,
         subject = subject,
-        questionCount = questions.size,
+        questionCount = questionCount,
         lastModifiedTimestamp = lastModifiedTimestamp
     )
+
 }

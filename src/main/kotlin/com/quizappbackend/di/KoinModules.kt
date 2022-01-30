@@ -35,10 +35,12 @@ object KoinModules {
         single(named(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME), true) {
             get<CoroutineDatabase>().getCollection<MongoQuestionnaire>(Constants.MONGO_QUESTIONNAIRE_COLLECTION_NAME).apply {
                 runBlocking(IO) {
-                    ensureIndex(MongoQuestionnaire::title)
                     ensureIndex(MongoQuestionnaire::authorInfo / AuthorInfo::userName)
                     ensureIndex(MongoQuestionnaire::authorInfo / AuthorInfo::userId)
+                    ensureIndex(MongoQuestionnaire::title)
                     ensureIndex(MongoQuestionnaire::lastModifiedTimestamp)
+                    ensureIndex(MongoQuestionnaire::title, MongoQuestionnaire::id)
+                    ensureIndex(MongoQuestionnaire::lastModifiedTimestamp, MongoQuestionnaire::id)
                 }
             }
         }
