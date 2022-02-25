@@ -11,4 +11,8 @@ data class MongoFaculty(
     val abbreviation: String,
     val name: String,
     val lastModifiedTimestamp : Long = getTimeMillis()
-) : DocumentMarker
+) : DocumentMarker {
+    companion object {
+        const val COLLECTION_NAME = "Faculty"
+    }
+}

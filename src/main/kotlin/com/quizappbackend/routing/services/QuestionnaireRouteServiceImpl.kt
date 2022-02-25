@@ -1,13 +1,15 @@
 package com.quizappbackend.routing.services
 
 import com.quizappbackend.authentication.JwtAuth.userId
+import com.quizappbackend.extensions.findOneById
+import com.quizappbackend.extensions.insertMany
 import com.quizappbackend.model.ktor.BackendRequest.*
 import com.quizappbackend.model.ktor.BackendResponse.*
 import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.mongodb.documents.MongoFilledQuestionnaire
 import com.quizappbackend.model.mongodb.documents.MongoQuestionnaire
 import com.quizappbackend.model.mongodb.dto.QuestionnaireIdWithTimestamp
-import com.quizappbackend.utils.QuestionnaireCreatorUtil
+import com.quizappbackend.utils.RandomQuestionnaireCreationUtil
 import io.ktor.auth.jwt.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -63,7 +65,7 @@ class QuestionnaireRouteServiceImpl(
 
 
     override suspend fun handleInsertRequest(request: InsertQuestionnairesRequest): InsertQuestionnairesResponse {
-        mongoRepository.insertOrReplaceQuestionnaire(request.mongoQuestionnaires).let { wasAcknowledged ->
+        mongoRepository.insertOrReplaceQuestionnaires(request.mongoQuestionnaires).let { wasAcknowledged ->
             return InsertQuestionnairesResponse(
                 if (wasAcknowledged) InsertQuestionnairesResponse.InsertQuestionnairesResponseType.SUCCESSFUL
                 else InsertQuestionnairesResponse.InsertQuestionnairesResponseType.NOT_ACKNOWLEDGED
@@ -82,14 +84,9 @@ class QuestionnaireRouteServiceImpl(
     }
 
 
-    override suspend fun handleGetPagedQuestionnairesRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesRequest) = mongoRepository.getQuestionnairesPaged(
-        userId = principle.userId,
-        request = request
-    )
-
-    override suspend fun handleGetPagedQuestionnairesWithPageKeysRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesWithPageKeysRequest) = withContext(IO) {
+    override suspend fun handleGetPagedQuestionnairesRequest(principle: JWTPrincipal, request: GetPagedQuestionnairesRequest) = withContext(IO) {
         val asyncPage = async {
-            mongoRepository.getQuestionnairesPagedWithPageKeys(
+            mongoRepository.getQuestionnairesPaged(
                 userId = principle.userId,
                 request = request
             )
@@ -105,7 +102,6 @@ class QuestionnaireRouteServiceImpl(
             questionnaires = asyncPage.await()
         )
     }
-
 
     override suspend fun handleDownloadQuestionnaireRequest(principle: JWTPrincipal, request: GetQuestionnaireRequest): GetQuestionnaireResponse {
         mongoRepository.insertFilledQuestionnaireIfNotPresent(principle.userId, MongoFilledQuestionnaire(request.questionnaireId))
@@ -154,8 +150,8 @@ class QuestionnaireRouteServiceImpl(
     }
 
 
-    override suspend fun handleGenerateRandomQuestionnairesRequest(principle: JWTPrincipal, amount: String): Boolean {
-        val questionnaireList = QuestionnaireCreatorUtil.generateRandomData(
+    override suspend fun handleGenerateRandomQuestionnairesRequest(principle: JWTPrincipal, amount: String) = mongoRepository.insertMany(
+        RandomQuestionnaireCreationUtil.generateRandomData(
             mongoRepository,
             principle,
             amount.toInt(),
@@ -164,44 +160,5 @@ class QuestionnaireRouteServiceImpl(
             minAnswersPerQuestion = 2,
             maxAnswersPerQuestion = 5
         )
-
-        return mongoRepository.insertMany(questionnaireList)
-    }
-
-
-    //OLD SHARE
-    //        mongoRepository.getUserWithUserName(request.userName)?.let { user ->
-//            val sharedWithInfo = SharedWithInfo(user.id, request.canEdit)
-//
-//            mongoRepository.findOneById<MongoQuestionnaire>(request.questionnaireId)?.let { questionnaire ->
-//                questionnaire.sharedWithInfos.firstOrNull{ it.userId == user.id}.let {
-//                    if(it == null){
-//                        val updated = questionnaire.copy(sharedWithInfos = questionnaire.sharedWithInfos.toMutableList().apply {
-//                            add(sharedWithInfo)
-//                        })
-//                        mongoRepository.updateOneById(updated.id, updated).let { wasAcknowledged ->
-//                            call.respond(HttpStatusCode.OK, ShareQuestionnaireWithUserResponse(ShareQuestionnaireWithUserResponseType.SUCCESSFUL))
-//                        }
-//                    } else {
-//                        if(it == sharedWithInfo){
-//                            call.respond(HttpStatusCode.OK, ShareQuestionnaireWithUserResponse(ShareQuestionnaireWithUserResponseType.ALREADY_SHARED_WITH_USER))
-//                        } else {
-//                            val updated = questionnaire.copy(sharedWithInfos = questionnaire.sharedWithInfos.toMutableList().apply {
-//                                remove(it)
-//                                add(sharedWithInfo)}
-//                            )
-//                            mongoRepository.updateOneById(updated.id, updated).let { wasAcknowledged ->
-//                                call.respond(HttpStatusCode.OK, ShareQuestionnaireWithUserResponse(ShareQuestionnaireWithUserResponseType.SUCCESSFUL))
-//                            }
-//                        }
-//                    }
-//                }
-//                return@post
-//            }
-//
-//            call.respond(HttpStatusCode.OK, ShareQuestionnaireWithUserResponse(ShareQuestionnaireWithUserResponseType.QUESTIONNAIRE_DOES_NOT_EXIST))
-//            return@post
-//        }
-//
-//        call.respond(HttpStatusCode.OK, ShareQuestionnaireWithUserResponse(ShareQuestionnaireWithUserResponseType.USER_DOES_NOT_EXIST))
+    )
 }

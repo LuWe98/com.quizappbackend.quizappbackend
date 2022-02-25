@@ -6,10 +6,6 @@ import kotlinx.serialization.Serializable
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId
 
-
-//TODO -> Es ist bei dem Löschen eines Studiengangs möglich, dass die Fakultät noch im Fragebogen bleibt.
-// Somit kann der Fragebogen noch mit der Fakultät gefunden werden, ohne einem Studiengang anzugehören
-// Oder es kann passieren, dass der Fragebogen
 @Serializable
 data class MongoCourseOfStudies(
     @BsonId val id: String = ObjectId().toHexString(),
@@ -18,4 +14,8 @@ data class MongoCourseOfStudies(
     val name: String,
     val degree: Degree,
     val lastModifiedTimestamp : Long = getTimeMillis()
-) : DocumentMarker
+) : DocumentMarker {
+    companion object {
+        const val COLLECTION_NAME = "CourseOfStudies"
+    }
+}

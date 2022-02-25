@@ -12,12 +12,11 @@ class FacultyRouteServiceImpl(
     private val mongoRepository: MongoRepository
 ) : FacultyRouteService {
 
-    // TODO -> Das hier noch machen, geht noch nicht
     override suspend fun handleSyncRequest(request: SyncFacultiesRequest): SyncFacultiesResponse = withContext(IO) {
 
         val facultiesNotUpToDateAsync = async { mongoRepository.findFacultiesNotUpToDateOfUser(request.localFacultyIdsWithTimeStamp) }
 
-        val facultiesIdsToDeleteAsync = async { mongoRepository.findFacultiesToDeleteLocally(request.localFacultyIdsWithTimeStamp) }
+        val facultiesIdsToDeleteAsync = async { mongoRepository.findFacultyIdsToDeleteLocally(request.localFacultyIdsWithTimeStamp) }
 
         val facultiesToUpdate: List<MongoFaculty>
         val facultiesToInsert: List<MongoFaculty>

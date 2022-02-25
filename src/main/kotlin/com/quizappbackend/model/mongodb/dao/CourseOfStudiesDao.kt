@@ -5,9 +5,9 @@ import com.quizappbackend.model.mongodb.dto.CourseOfStudiesIdWithTimeStamp
 
 interface CourseOfStudiesDao: BaseDao<MongoCourseOfStudies> {
 
-    suspend fun isCourseOfStudiesAbbreviationAlreadyUsed(courseOfStudies: MongoCourseOfStudies) : Boolean
+    suspend fun insertOrReplaceCourseOfStudies(courseOfStudies: MongoCourseOfStudies, id: String, upsert: Boolean = false): Boolean
 
-    suspend fun findCourseOfStudiesByFacultyId(facultyId: String) : List<MongoCourseOfStudies>
+    suspend fun isCourseOfStudiesAbbreviationAlreadyUsed(courseOfStudies: MongoCourseOfStudies) : Boolean
 
     suspend fun findCourseOfStudiesToDeleteLocally(localCourseOfStudiesIdsWithTimeStamp: List<CourseOfStudiesIdWithTimeStamp>): List<String>
 

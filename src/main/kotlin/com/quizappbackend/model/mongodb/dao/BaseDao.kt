@@ -1,7 +1,5 @@
 package com.quizappbackend.model.mongodb.dao
 
-import com.mongodb.client.model.ReplaceOneModel
-import com.mongodb.client.model.ReplaceOptions
 import com.quizappbackend.model.mongodb.documents.DocumentMarker
 import org.litote.kmongo.`in`
 import org.litote.kmongo.coroutine.CoroutineCollection
@@ -32,11 +30,4 @@ interface BaseDao<T : DocumentMarker> {
 
     suspend fun findManyByIds(ids: List<String>, idField: KProperty<String?>) = collection.find(idField `in` ids).toList()
 
-    suspend fun replaceOneById(entry: T, id: String, upsert: Boolean) = collection.replaceOneById(id, entry, ReplaceOptions().upsert(upsert)).wasAcknowledged()
-
-    suspend fun replaceManyById(entries: List<T>, idField: KProperty<String?>, upsert: Boolean) = entries.map {
-        ReplaceOneModel(idField eq idField.call(it), it, ReplaceOptions().upsert(upsert))
-    }.let { bulkReplace ->
-        collection.bulkWrite(bulkReplace).wasAcknowledged()
-    }
 }

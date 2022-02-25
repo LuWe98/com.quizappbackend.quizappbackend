@@ -16,13 +16,13 @@ interface UserRouteService {
 
     suspend fun handleGetRefreshTokenRequest(request: RefreshJwtTokenRequest): RefreshJwtTokenResponse
 
-    suspend fun handleSyncUserDataRequest(principle: JWTPrincipal, request: SyncUserDataRequest): SyncUserDataResponse
-
-    suspend fun handleUpdateUserNameRequest(principle: JWTPrincipal, request: UpdateUserNameRequest): UpdateUserResponse
+    suspend fun handleSyncUserDataRequest(principle: JWTPrincipal): SyncUserDataResponse
 
     suspend fun handleUpdatePasswordRequest(principle: JWTPrincipal, request: ChangePasswordRequest): ChangePasswordResponse
 
     suspend fun handleUpdateUserRoleRequest(request: UpdateUserRoleRequest): UpdateUserResponse
+
+    suspend fun handleUpdateUserCanShareQuestionnaireWithRequest(principle: JWTPrincipal):UpdateUserCanShareQuestionnaireWithResponse
 
     suspend fun handleDeleteOwnUserRequest(principle: JWTPrincipal): DeleteUserResponse
 

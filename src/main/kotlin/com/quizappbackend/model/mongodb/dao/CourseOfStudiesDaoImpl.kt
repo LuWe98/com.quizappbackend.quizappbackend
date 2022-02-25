@@ -1,5 +1,6 @@
 package com.quizappbackend.model.mongodb.dao
 
+import com.mongodb.client.model.ReplaceOptions
 import com.mongodb.client.model.UpdateManyModel
 import com.quizappbackend.model.mongodb.documents.MongoCourseOfStudies
 import com.quizappbackend.model.mongodb.dto.CourseOfStudiesIdWithTimeStamp
@@ -11,11 +12,11 @@ class CourseOfStudiesDaoImpl(
     override var collection: CoroutineCollection<MongoCourseOfStudies>
 ) :CourseOfStudiesDao {
 
+    override suspend fun insertOrReplaceCourseOfStudies(courseOfStudies: MongoCourseOfStudies, id: String, upsert: Boolean) =
+        collection.replaceOneById(id, courseOfStudies, ReplaceOptions().upsert(upsert)).wasAcknowledged()
+
     override suspend fun isCourseOfStudiesAbbreviationAlreadyUsed(courseOfStudies: MongoCourseOfStudies) =
         collection.findOne(and(MongoCourseOfStudies::abbreviation eq courseOfStudies.abbreviation, MongoCourseOfStudies::id ne courseOfStudies.id)) != null
-
-    override suspend fun findCourseOfStudiesByFacultyId(facultyId: String) = collection.find(MongoCourseOfStudies::facultyIds contains facultyId).toList()
-
 
     override suspend fun findCourseOfStudiesToDeleteLocally(localCourseOfStudiesIdsWithTimeStamp: List<CourseOfStudiesIdWithTimeStamp>): List<String> {
         return localCourseOfStudiesIdsWithTimeStamp.map(CourseOfStudiesIdWithTimeStamp::courseOfStudiesId).let { facultyIds ->
@@ -56,39 +57,4 @@ class CourseOfStudiesDaoImpl(
         MongoCourseOfStudies::id eq courseOfStudiesIdWithTimeStamp.courseOfStudiesId,
         MongoCourseOfStudies::lastModifiedTimestamp ne courseOfStudiesIdWithTimeStamp.lastModifiedTimestamp
     )
-
-
-//    suspend fun generateSyncFacultiesResponse(courseOfStudiesIdsWithTimeStamps: List<CourseOfStudiesIdWithTimeStamp>) : SyncCoursesOfStudiesResponse = withContext(IO) {
-//        val localCourseOfStudiesIds = courseOfStudiesIdsWithTimeStamps.map(CourseOfStudiesIdWithTimeStamp::courseOfStudiesId)
-//
-//        val coursesOfStudiesToDownloadAsync = async {
-//            collection.find(or(buildFilter(courseOfStudiesIdsWithTimeStamps), MongoCourseOfStudies::id nin localCourseOfStudiesIds)).toList()
-//        }
-//
-//        val coursesOfStudiesToDeleteAsync = async {
-//            collection.find(MongoCourseOfStudies::id `in` localCourseOfStudiesIds).toList().let { allCoursesOfStudies ->
-//                localCourseOfStudiesIds.filter { id -> allCoursesOfStudies.none { it.id == id } }
-//            }
-//        }
-//
-//        val coursesOfStudiesToUpdate: List<MongoCourseOfStudies>
-//        val coursesOfStudiesToInsert: List<MongoCourseOfStudies>
-//
-//        coursesOfStudiesToDownloadAsync.await().let {
-//            coursesOfStudiesToUpdate = it.filter { cos -> localCourseOfStudiesIds.any { id -> cos.id == id } }
-//            coursesOfStudiesToInsert = it - coursesOfStudiesToUpdate.toSet()
-//        }
-//
-//        SyncCoursesOfStudiesResponse(
-//            coursesOfStudiesToInsert = coursesOfStudiesToInsert,
-//            coursesOfStudiesToUpdate = coursesOfStudiesToUpdate,
-//            courseOfStudiesIdsToDelete = coursesOfStudiesToDeleteAsync.await()
-//        )
-//    }
-//
-//    private fun buildFilter(courseOfStudiesIdsWithTimeStamps: List<CourseOfStudiesIdWithTimeStamp>) =
-//        or(courseOfStudiesIdsWithTimeStamps.map {
-//            and(MongoCourseOfStudies::id eq it.courseOfStudiesId, MongoCourseOfStudies::lastModifiedTimestamp ne it.lastModifiedTimestamp)
-//        })
-
 }

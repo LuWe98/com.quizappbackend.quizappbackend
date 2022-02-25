@@ -12,16 +12,13 @@ interface QuestionnaireDao : BaseDao<MongoQuestionnaire> {
 
     suspend fun updateAuthorNameOfQuestionnaires(userId: String, newUserName: String): Boolean
 
+    suspend fun insertOrReplaceQuestionnaires(mongoQuestionnaires: List<MongoQuestionnaire>, upsert: Boolean = true) : Boolean
+
     suspend fun getAllQuestionnairesConnectedToUser(
         userId: String,
         questionnairesToIgnore: List<String>,
         questionnairesToFind: List<String>
     ): List<MongoQuestionnaire>
-
-    suspend fun getQuestionnairesPaged(
-        userId: String,
-        request: BackendRequest.GetPagedQuestionnairesRequest
-    ): List<MongoBrowsableQuestionnaire>
 
     suspend fun getXAmountOfQuestionnaires(limit: Int): List<MongoQuestionnaire>
 
@@ -29,18 +26,14 @@ interface QuestionnaireDao : BaseDao<MongoQuestionnaire> {
 
     suspend fun removeCourseOfStudiesFromQuestionnaire(courseOfStudiesId: String): Boolean
 
-
-
-
-
-    suspend fun getQuestionnairesPagedWithPageKeys(
+    suspend fun getQuestionnairesPaged(
         userId: String,
-        request: BackendRequest.GetPagedQuestionnairesWithPageKeysRequest
+        request: BackendRequest.GetPagedQuestionnairesRequest
     ): List<MongoBrowsableQuestionnaire>
 
-    suspend fun getPreviousPageKeys(
+    suspend fun getQuestionnaireRefreshKeys(
         userId: String,
-        request: BackendRequest.GetPagedQuestionnairesWithPageKeysRequest
+        request: BackendRequest.GetPagedQuestionnairesRequest
     ): BrowsableQuestionnairePageKeys?
 
 }

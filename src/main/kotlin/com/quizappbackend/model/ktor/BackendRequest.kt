@@ -70,7 +70,6 @@ sealed class BackendRequest {
         val searchString: String
     ): BackendRequest()
 
-
     @Serializable
     data class GetPagedUserAdminRequest(
         val limit: Int,
@@ -81,22 +80,8 @@ sealed class BackendRequest {
         val ascending: Boolean
     ): BackendRequest()
 
-
     @Serializable
     data class GetPagedQuestionnairesRequest(
-        val limit: Int,
-        val page: Int,
-        val searchString: String,
-        val questionnaireIdsToIgnore: List<String>,
-        val facultyIds: List<String>,
-        val courseOfStudiesIds: List<String>,
-        val authorIds: List<String>,
-        val orderBy: BrowsableQuestionnaireOrderBy,
-        val ascending: Boolean
-    ): BackendRequest()
-
-    @Serializable
-    data class GetPagedQuestionnairesWithPageKeysRequest(
         val lastPageKeys: BrowsableQuestionnairePageKeys,
         val limit: Int,
         val searchString: String,
@@ -195,21 +180,8 @@ sealed class BackendRequest {
 
 
     @Serializable
-    data class SyncUserDataRequest(
-        val userId: String
-    ): BackendRequest()
-
-
-    @Serializable
-    data class UpdateUserNameRequest(
-        val newUserName: String
-    ): BackendRequest()
-
-
-    @Serializable
     data class UpdateUserRoleRequest(
         val userId: String,
         val newRole: Role
     ): BackendRequest()
-
 }

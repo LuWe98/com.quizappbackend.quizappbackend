@@ -10,12 +10,16 @@ import org.bson.types.ObjectId
 @Serializable
 data class User(
     @BsonId val id: String = ObjectId().toHexString(),
-    val userName: String,
+    val name: String,
     val password: String = "",
     val role: Role = Role.USER,
-    val lastModifiedTimestamp : Long = getTimeMillis()
+    val lastModifiedTimestamp: Long = getTimeMillis(),
+    val canShareQuestionnairesWith: Boolean = false
 ) : DocumentMarker {
 
-    fun asAuthorInfo() = AuthorInfo(id, userName)
+    fun asAuthorInfo() = AuthorInfo(id, name)
 
+    companion object {
+        const val COLLECTION_NAME = "Users"
+    }
 }

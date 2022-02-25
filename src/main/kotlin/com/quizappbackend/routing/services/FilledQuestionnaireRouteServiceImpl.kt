@@ -1,11 +1,14 @@
 package com.quizappbackend.routing.services
 
 import com.quizappbackend.authentication.JwtAuth.userId
+import com.quizappbackend.extensions.deleteManyById
+import com.quizappbackend.extensions.deleteManyByIds
+import com.quizappbackend.extensions.insertMany
 import com.quizappbackend.model.ktor.BackendRequest.*
 import com.quizappbackend.model.ktor.BackendResponse.*
 import com.quizappbackend.model.mongodb.MongoRepository
 import com.quizappbackend.model.mongodb.documents.MongoFilledQuestionnaire
-import com.quizappbackend.utils.QuestionnaireCreatorUtil
+import com.quizappbackend.utils.RandomQuestionnaireCreationUtil
 import io.ktor.auth.jwt.*
 
 class FilledQuestionnaireRouteServiceImpl(
@@ -74,7 +77,7 @@ class FilledQuestionnaireRouteServiceImpl(
 
 
     override suspend fun handleGenerateRandomRequest(principle: JWTPrincipal, amount: String): Boolean {
-        val questionnaireList = QuestionnaireCreatorUtil.generateRandomFilledQuestionnaires(
+        val questionnaireList = RandomQuestionnaireCreationUtil.generateRandomFilledQuestionnaires(
             principle.userId,
             mongoRepository.getXAmountOfQuestionnaires(amount.toInt())
         )
